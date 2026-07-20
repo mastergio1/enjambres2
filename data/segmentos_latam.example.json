@@ -1,0 +1,40 @@
+{
+  "_nota": "Segmentación de ejemplo. Reemplaza estas distribuciones por las del panel/CRM del cliente. Los pesos se normalizan automáticamente.",
+  "dimensiones": {
+    "pais": {
+      "México": 34, "Colombia": 12, "Argentina": 10, "Perú": 8,
+      "Chile": 6, "Ecuador": 5, "Guatemala": 4, "Venezuela": 6,
+      "Bolivia": 3, "Rep. Dominicana": 3, "Otros LATAM": 9
+    },
+    "edad": {"18-24": 22, "25-34": 30, "35-44": 24, "45-54": 14, "55+": 10},
+    "genero": {"femenino": 50, "masculino": 48, "no binario": 2},
+    "nse": {"A/B (alto)": 12, "C (medio)": 45, "D/E (bajo)": 43},
+    "urbanidad": {"urbano": 68, "periurbano": 20, "rural": 12}
+  },
+  "condicionales": {
+    "edad": {
+      "segun": "pais",
+      "tablas": {
+        "México":    {"18-24": 28, "25-34": 32, "35-44": 22, "45-54": 11, "55+": 7},
+        "Guatemala": {"18-24": 34, "25-34": 30, "35-44": 20, "45-54": 10, "55+": 6},
+        "Argentina": {"18-24": 15, "25-34": 24, "35-44": 24, "45-54": 18, "55+": 19},
+        "Chile":     {"18-24": 16, "25-34": 25, "35-44": 25, "45-54": 17, "55+": 17}
+      }
+    }
+  },
+  "ocean_priors": {
+    "nse": {
+      "A/B (alto)": {"apertura": 0.5, "neuroticismo": -0.3},
+      "D/E (bajo)": {"apertura": -0.3, "responsabilidad": 0.2}
+    },
+    "pais": {
+      "Argentina": {"extraversion": 0.4},
+      "México": {"amabilidad": 0.3}
+    }
+  },
+  "intereses_por_nse": {
+    "A/B (alto)": ["viajes", "tecnología", "bienestar", "gastronomía", "inversión"],
+    "C (medio)": ["familia", "ahorro", "fútbol", "series", "emprendimiento"],
+    "D/E (bajo)": ["ofertas", "comunidad", "fútbol", "música", "religión"]
+  }
+}

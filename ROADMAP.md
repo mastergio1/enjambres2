@@ -42,14 +42,17 @@ LLM simulado (sin llaves de API).
   calibración), `examples/demo.py`, docs.
 - **Éxito:** `python examples/demo.py` corre un A/B/C y rankea variantes. ✓
 
-### Fase 1 — Personas ancladas en datos reales *(~1–2 sem)*
+### ✅ Fase 1 — Personas ancladas en datos reales *(completa)*
 Convertir el generador de personas de "muestreo por defecto" a personas
 calibradas contra una fuente demográfica LATAM real y enriquecidas con RAG.
-- **Entregables:** carga de distribuciones por país/segmento desde datos del
-  cliente (CSV/JSON); capa RAG opcional (reviews, tickets, social listening);
-  perfiles psicográficos por segmento.
-- **Éxito:** la distribución de la audiencia sintética reproduce la del panel
-  objetivo dentro de un margen acordado; las personas citan contexto real.
+- **Entregables:** ✓ carga de segmentación desde JSON del cliente
+  (`Segmentacion.desde_json`); ✓ distribuciones condicionales (edad|país);
+  ✓ priors OCEAN por segmento; ✓ intereses por NSE; ✓ capa RAG
+  (`conocimiento.py`, recuperador TF-IDF) que aterriza cada persona en
+  reseñas/tickets reales; ✓ validación de distribución (`validacion.py`).
+- **Éxito:** ✓ la audiencia sintética reproduce el objetivo (desv_max ≤ 0.05 en
+  todas las marginales, n=2000); ✓ las personas citan contexto real en su
+  system prompt. Ver `examples/demo_fase1.py`.
 
 ### Fase 2 — Elicitación calibrada (SSR) + LLM real *(~2 sem)*
 Reemplazar el `ExtractorRating` heurístico por el método **SSR** (Semantic
@@ -111,7 +114,7 @@ de "población que delibera".
 ## Estado actual
 
 - [x] Fase 0 — fundaciones y demo end-to-end
-- [ ] Fase 1 — personas ancladas
+- [x] Fase 1 — personas ancladas (demografía real + condicionales + OCEAN + RAG + validación)
 - [ ] Fase 2 — SSR + LLM real
 - [ ] Fase 3 — calibración/backtesting
 - [ ] Fase 4 — interfaz

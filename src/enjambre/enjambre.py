@@ -10,6 +10,7 @@ from __future__ import annotations
 from dataclasses import dataclass
 from statistics import mean, pstdev
 
+from .conocimiento import BaseConocimiento
 from .elicitacion import ExtractorRating
 from .llm import LLMClient
 from .personas import GeneradorPersonas, Persona
@@ -58,10 +59,24 @@ class Enjambre:
         llm: LLMClient,
         generador: GeneradorPersonas | None = None,
         extractor: ExtractorRating | None = None,
+        conocimiento: BaseConocimiento | None = None,
+        k_contexto: int = 3,
     ) -> None:
         self.llm = llm
         self.generador = generador or GeneradorPersonas()
         self.extractor = extractor or ExtractorRating()
+        self.conocimiento = conocimiento
+        self.k_contexto = k_contexto
+
+    def _evidencia(self, estimulo: str, contexto: str, persona: Persona) -> list[str]:
+        if not self.conocimiento:
+            return []
+        docs = self.conocimiento.recuperar(
+            f"{estimulo} {contexto}".strip(),
+            k=self.k_contexto,
+            tags_preferidos={"pais": persona.pais, "nse": persona.nse},
+        )
+        return [d.texto for d in docs]
 
     def _prompt(self, estimulo: str, contexto: str) -> str:
         ctx = f"\nContexto: {contexto}" if contexto else ""
@@ -79,7 +94,8 @@ class Enjambre:
         reacciones: list[Reaccion] = []
         prompt = self._prompt(estimulo, contexto)
         for p in personas:
-            texto = self.llm.completar(p.system_prompt(), prompt, temperatura=temperatura)
+            evidencia = self._evidencia(estimulo, contexto, p)
+            texto = self.llm.completar(p.system_prompt(evidencia), prompt, temperatura=temperatura)
             reacciones.append(Reaccion(persona=p, texto=texto, intencion=self.extractor.extraer(texto)))
         return Resultado(estimulo=estimulo, reacciones=reacciones)
 

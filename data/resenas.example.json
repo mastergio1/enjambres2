@@ -1,0 +1,14 @@
+[
+  {"texto": "El yogurt de proteína me encanta para después del gym, pero el precio en México se me hace un poco alto.", "tags": {"pais": "México", "nse": "C (medio)", "categoria": "yogurt proteico"}, "fuente": "reseña"},
+  {"texto": "Compro estas bebidas por lo saludable, cero azúcar es lo que busco. La botella retornable me parece un plus.", "tags": {"pais": "Chile", "nse": "A/B (alto)", "categoria": "yogurt proteico"}, "fuente": "reseña"},
+  {"texto": "Sinceramente lo de la sostenibilidad no me mueve, yo miro que rinda y que sea barato para toda la familia.", "tags": {"pais": "México", "nse": "D/E (bajo)", "categoria": "yogurt proteico"}, "fuente": "reseña"},
+  {"texto": "La proteína está bien pero sabe muy artificial, preferiría algo más natural aunque tenga menos.", "tags": {"pais": "Colombia", "nse": "C (medio)", "categoria": "yogurt proteico"}, "fuente": "ticket"},
+  {"texto": "Me gusta que sea sin azúcar porque soy diabética, ojalá lo consiguiera más fácil en el súper del barrio.", "tags": {"pais": "Argentina", "nse": "C (medio)", "categoria": "bebida saludable"}, "fuente": "reseña"},
+  {"texto": "Lo de la botella retornable suena lindo pero en mi ciudad no hay dónde devolverla, termina siendo lo mismo.", "tags": {"pais": "Perú", "nse": "C (medio)", "categoria": "empaque"}, "fuente": "reseña"},
+  {"texto": "Pago más por marcas que cuidan el medio ambiente, para mí eso vale y lo comparto en redes.", "tags": {"pais": "Chile", "nse": "A/B (alto)", "categoria": "empaque"}, "fuente": "social"},
+  {"texto": "Para mí lo importante es que llene y aguante hasta el almuerzo, el marketing de fitness me da igual.", "tags": {"pais": "México", "nse": "D/E (bajo)", "categoria": "yogurt proteico"}, "fuente": "reseña"},
+  {"texto": "El sabor está increíble, lo tomo en el desayuno con mis hijos. Me sale un poco caro pero lo vale.", "tags": {"pais": "Colombia", "nse": "C (medio)", "categoria": "yogurt proteico"}, "fuente": "reseña"},
+  {"texto": "Probé la versión sin azúcar y me pareció aguada, la de antes con azúcar sabía mejor la verdad.", "tags": {"pais": "Venezuela", "nse": "C (medio)", "categoria": "bebida saludable"}, "fuente": "ticket"},
+  {"texto": "Como deportista busco el máximo de proteína por porción, comparo etiquetas antes de comprar.", "tags": {"pais": "Argentina", "nse": "A/B (alto)", "categoria": "yogurt proteico"}, "fuente": "reseña"},
+  {"texto": "Lo compro por promoción, si no está en oferta busco otra marca. La lealtad me la gano con el precio.", "tags": {"pais": "México", "nse": "D/E (bajo)", "categoria": "yogurt proteico"}, "fuente": "social"}
+]

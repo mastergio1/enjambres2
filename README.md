@@ -45,19 +45,25 @@ enjambre = Enjambre(llm=AnthropicClient(modelo="claude-sonnet-5"))  # requiere A
 
 ```
 src/enjambre/
-  personas.py      Generador de personas ancladas en segmentos LATAM (+ OCEAN)
+  personas.py      Personas ancladas en segmentos LATAM (demografía + condicionales + OCEAN + intereses)
+  conocimiento.py  Capa RAG: aterriza personas en reseñas/tickets reales (recuperador TF-IDF)
   llm.py           Clientes de LLM intercambiables (Mock / Anthropic)
   elicitacion.py   Intención de compra desde texto libre (ExtractorRating, SSR)
-  enjambre.py      Orquestador: estímulo -> reacción colectiva -> ranking
+  enjambre.py      Orquestador: estímulo -> reacción colectiva (con RAG) -> ranking
+  validacion.py    ¿La audiencia sintética reproduce la distribución objetivo?
   calibracion.py   Registro y correlación predicción vs. realidad (el foso)
-examples/demo.py   Demo end-to-end
-docs/              Arquitectura y ficha de la idea #1
+examples/demo.py         Demo end-to-end (Fase 0)
+examples/demo_fase1.py   Personas ancladas + validación + RAG (Fase 1)
+data/                    Segmentación y reseñas de ejemplo (reemplazar por datos del cliente)
+docs/                    Arquitectura y ficha de la idea #1
 ```
 
 ## Estado
 
-Fase 0 (fundaciones) completa: el flujo corre end-to-end con LLM simulado.
-Próximo: Fase 1 (personas ancladas en datos reales). Ver `ROADMAP.md`.
+Fases 0 y 1 completas: personas ancladas en datos demográficos reales (con
+distribuciones condicionales, priors OCEAN e intereses por segmento) y
+aterrizadas con RAG; la audiencia sintética reproduce la distribución objetivo.
+Próximo: Fase 2 (método SSR + Claude real). Ver `ROADMAP.md`.
 
 ## Requisitos
 

@@ -103,37 +103,69 @@ def _coseno(a: dict[str, float], b: dict[str, float]) -> float:
 # --------------------------------------------------------------------------- #
 # Semantic Similarity Rating
 # --------------------------------------------------------------------------- #
+# Juego de anclas por defecto.
+ANCLAS_DEFAULT = {
+    1: "No me interesa para nada, jamás lo compraría.",
+    2: "No me convence, probablemente no lo compre.",
+    3: "Tal vez, no estoy seguro, lo pensaría.",
+    4: "Me gusta, probablemente lo compre.",
+    5: "Me encanta, definitivamente lo compraría.",
+}
+
+# Anclas del paquete de backtest Chile (español de Chile, intención de compra/descarga).
+ANCLAS_CHILE = {
+    1: "De ninguna manera compraría o descargaría esto; no me interesa para nada.",
+    2: "Probablemente no lo compraría; no me convence y le veo problemas.",
+    3: "Me da lo mismo; podría o no comprarlo, no me genera nada especial.",
+    4: "Probablemente sí lo compraría o descargaría; me parece bueno y útil.",
+    5: "Sin duda lo compraría o descargaría; me encanta y es justo lo que busco.",
+}
+
+
 class SSR:
     """Convierte una reacción abierta en intención de compra por similitud.
 
     Mide la similitud de la respuesta contra cinco frases-ancla (una por punto
     de la escala), las convierte en una distribución con softmax y devuelve el
     valor esperado (1-5).
+
+    ``anclas`` puede ser un juego (dict {1..5: texto}) o una lista de juegos; en
+    ese caso se promedian las distribuciones, como recomienda el método SSR para
+    reducir la sensibilidad a la redacción de las anclas.
     """
 
-    ANCLAS = {
-        1: "No me interesa para nada, jamás lo compraría.",
-        2: "No me convence, probablemente no lo compre.",
-        3: "Tal vez, no estoy seguro, lo pensaría.",
-        4: "Me gusta, probablemente lo compre.",
-        5: "Me encanta, definitivamente lo compraría.",
-    }
+    ANCLAS = ANCLAS_DEFAULT
 
-    def __init__(self, embedder: Embedder | None = None, nitidez: float = 10.0) -> None:
+    def __init__(
+        self,
+        embedder: Embedder | None = None,
+        nitidez: float = 10.0,
+        anclas: dict | list[dict] | None = None,
+    ) -> None:
         self.embedder = embedder or EmbedderLexico()
         self.nitidez = nitidez
-        self._niveles = sorted(self.ANCLAS)
-        self._textos_ancla = [self.ANCLAS[n] for n in self._niveles]
+        if anclas is None:
+            conjuntos = [self.ANCLAS]
+        elif isinstance(anclas, dict):
+            conjuntos = [anclas]
+        else:
+            conjuntos = list(anclas)
+        self._conjuntos = [(sorted(c), [c[n] for n in sorted(c)]) for c in conjuntos]
 
     def distribucion(self, respuesta: str) -> dict[int, float]:
         if not respuesta or not respuesta.strip():
             return {}
-        vecs = self.embedder.embed(self._textos_ancla + [respuesta])
-        anclas, resp = vecs[:-1], vecs[-1]
-        sims = [_coseno(resp, a) for a in anclas]
-        pesos = [math.exp(self.nitidez * s) for s in sims]
-        total = sum(pesos) or 1.0
-        return {n: p / total for n, p in zip(self._niveles, pesos)}
+        acumulado: dict[int, float] = {}
+        for niveles, textos in self._conjuntos:
+            vecs = self.embedder.embed(textos + [respuesta])
+            anclas, resp = vecs[:-1], vecs[-1]
+            sims = [_coseno(resp, a) for a in anclas]
+            pesos = [math.exp(self.nitidez * s) for s in sims]
+            total = sum(pesos) or 1.0
+            for n, p in zip(niveles, pesos):
+                acumulado[n] = acumulado.get(n, 0.0) + p / total
+        k = len(self._conjuntos)
+        return {n: v / k for n, v in acumulado.items()}
 
     def intencion(self, respuesta: str) -> float | None:
         dist = self.distribucion(respuesta)

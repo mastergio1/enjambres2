@@ -67,13 +67,19 @@ Similarity Rating) y enchufar Claude como LLM de producción.
   intención es continua. *Pendiente para producción:* medir correlación contra
   un set histórico real con un embedder semántico (meta r ≥ 0.7 zero-shot).
 
-### Fase 3 — Motor de calibración y backtesting *(~1–2 sem)*
+### ✅ Fase 3 — Motor de calibración y backtesting *(completa)*
 El foso operativo: medir sistemáticamente qué tan bien predice el enjambre.
-- **Entregables:** ampliar `RegistroCalibracion` con métricas por vertical,
-  reportes de correlación, e ingestión de resultados reales; motor
-  anti-homogeneidad (validar que la *varianza* sintética se parezca a la humana).
-- **Éxito:** dashboard de calibración con ≥20 casos cerrados y correlación
-  reportada honestamente por categoría.
+- **Entregables:** ✓ arnés de backtest ciego (`backtest.py`) con persona chilena
+  muestreada de datos reales (Censo 2024 + GSE AIM, GSE parcial declarado);
+  ✓ elicitación por texto libre + anclas SSR en español de Chile (promedio de
+  varios juegos); ✓ selección estratificada por rango de nota; ✓ métricas
+  (`metricas.py`): correlación, forma de la distribución (KS), MAE, baseline
+  tonto; ✓ controles anti-autoengaño (dispersión de muestra, variedad de
+  agentes). Ver `docs/calibracion.md` y `examples/demo_fase3.py`.
+- **Éxito:** ✓ el arnés corre end-to-end y reporta la doble métrica; con LLM
+  simulado da correlación ~0 y los controles lo detectan (no supera al baseline)
+  — prueba de que no hace trampa. *Pendiente para producción:* correr con Claude
+  real + embedder semántico sobre un dataset con nota real (meta r ≥ 0.70).
 
 ### Fase 4 — Interfaz "sube y reacciona" *(~2–3 sem)*
 Que un no-técnico suba un creativo/mensaje y reciba la reacción + ranking.
@@ -121,7 +127,7 @@ de "población que delibera".
 - [x] Fase 0 — fundaciones y demo end-to-end
 - [x] Fase 1 — personas ancladas (demografía real + condicionales + OCEAN + RAG + validación)
 - [x] Fase 2 — SSR + LLM real (elicitación semántica intercambiable + Claude conectable)
-- [ ] Fase 3 — calibración/backtesting
+- [x] Fase 3 — calibración/backtesting (arnés ciego Chile + doble métrica + anti-autoengaño)
 - [ ] Fase 4 — interfaz
 - [ ] Fase 5 — piloto
 - [ ] Fase 6 — empaquetado y siguientes rubros

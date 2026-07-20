@@ -1,0 +1,18 @@
+{
+  "_fuente": "Censo 2024 INE + modelo GSE AIM 2023 (base CASEN 2022). Ver docs/calibracion.md.",
+  "_advertencia_gse": "Los grupos C3, D y E NO están verificados en fuente primaria y por eso NO se incluyen. El backtest corre solo sobre AB→C2 y así debe declararse (sesga la audiencia a NSE alto/medio). Para completar: descargar el Manual GSE AIM 2023 (aimchile.cl/gse-chile). NO rellenar con cifras plausibles.",
+  "genero": {"mujer": 0.515, "hombre": 0.485},
+  "edad_tramos": {"0-14": 0.177, "15-64": 0.683, "65+": 0.140},
+  "region": {
+    "Metropolitana": 0.400, "Valparaiso": 0.103, "Biobio": 0.087, "Maule": 0.061,
+    "Araucania": 0.055, "OHiggins": 0.053, "LosLagos": 0.048, "Coquimbo": 0.045,
+    "Antofagasta": 0.034, "Nuble": 0.028, "LosRios": 0.022, "Tarapaca": 0.020,
+    "Atacama": 0.016, "AricaParinacota": 0.013, "Magallanes": 0.009, "Aysen": 0.005
+  },
+  "gse": {
+    "AB": 0.021,
+    "C1a": 0.091,
+    "C1b": 0.100,
+    "C2": 0.147
+  }
+}

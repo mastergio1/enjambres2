@@ -50,22 +50,27 @@ src/enjambre/
   llm.py           Clientes de LLM intercambiables (Mock / Anthropic)
   elicitacion.py   Intención de compra desde texto libre: ExtractorRating y método SSR (+ Embedder)
   enjambre.py      Orquestador: estímulo -> reacción colectiva (con RAG) -> ranking
+  backtest.py      Arnés de calibración ciego (persona Chile + SSR + estratificación)
+  metricas.py      Correlación, forma de distribución (KS), MAE, baseline tonto
   validacion.py    ¿La audiencia sintética reproduce la distribución objetivo?
   calibracion.py   Registro y correlación predicción vs. realidad (el foso)
 examples/demo.py         Demo end-to-end (Fase 0)
 examples/demo_fase1.py   Personas ancladas + validación + RAG (Fase 1)
 examples/demo_fase2.py   Método SSR + Claude real opcional (Fase 2)
-data/                    Segmentación y reseñas de ejemplo (reemplazar por datos del cliente)
-docs/                    Contexto y casos de uso, arquitectura y ficha de la idea #1
+examples/demo_fase3.py   Backtest de calibración ciego, foco Chile (Fase 3)
+data/                    Segmentación, reseñas e ítems de ejemplo (reemplazar por datos del cliente)
+docs/                    Contexto y casos de uso, arquitectura, calibración e idea #1
 ```
 
 ## Estado
 
-Fases 0, 1 y 2 completas: personas ancladas en datos demográficos reales y
-aterrizadas con RAG; medición de intención con el método **SSR** (similitud
-semántica, evita el sesgo del Likert directo); Claude real conectable con
-`ANTHROPIC_API_KEY`. Próximo: Fase 3 (motor de calibración/backtesting).
-Ver `ROADMAP.md`. Para el panorama del producto: `docs/contexto.md`.
+Fases 0–3 completas: personas ancladas en datos demográficos reales (LATAM y
+Chile) y aterrizadas con RAG; medición de intención con el método **SSR**;
+**arnés de backtest ciego** con muestreo estratificado, doble métrica
+(correlación + forma) y controles anti-autoengaño. Claude real conectable con
+`ANTHROPIC_API_KEY`. Próximo: Fase 4 (interfaz "sube y reacciona").
+Ver `ROADMAP.md`. Panorama del producto: `docs/contexto.md`; método de
+calibración: `docs/calibracion.md`.
 
 ## Requisitos
 

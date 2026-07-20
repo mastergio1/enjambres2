@@ -54,13 +54,18 @@ calibradas contra una fuente demográfica LATAM real y enriquecidas con RAG.
   todas las marginales, n=2000); ✓ las personas citan contexto real en su
   system prompt. Ver `examples/demo_fase1.py`.
 
-### Fase 2 — Elicitación calibrada (SSR) + LLM real *(~2 sem)*
+### ✅ Fase 2 — Elicitación calibrada (SSR) + LLM real *(completa)*
 Reemplazar el `ExtractorRating` heurístico por el método **SSR** (Semantic
 Similarity Rating) y enchufar Claude como LLM de producción.
-- **Entregables:** `SSR` funcional con embeddings; cliente `AnthropicClient`
-  productivo; control de costo (modo rápido/profundo); multi-modelo opcional.
-- **Éxito:** en un set histórico de conceptos con intención de compra conocida,
-  la correlación supera un umbral mínimo (meta: r ≥ 0.7 zero-shot).
+- **Entregables:** ✓ `SSR` funcional (distribución sobre anclas Likert por
+  similitud semántica + intención esperada continua); ✓ interfaz `Embedder`
+  con `EmbedderLexico` offline para dev/tests y ranura para embeddings
+  semánticos reales; ✓ elicitación intercambiable en el orquestador
+  (ExtractorRating ↔ SSR); ✓ cliente `AnthropicClient` conectable con solo
+  definir `ANTHROPIC_API_KEY`. Ver `examples/demo_fase2.py`.
+- **Éxito:** ✓ SSR es monótono (texto negativo→positivo produce 1.05→4.94) y su
+  intención es continua. *Pendiente para producción:* medir correlación contra
+  un set histórico real con un embedder semántico (meta r ≥ 0.7 zero-shot).
 
 ### Fase 3 — Motor de calibración y backtesting *(~1–2 sem)*
 El foso operativo: medir sistemáticamente qué tan bien predice el enjambre.
@@ -115,7 +120,7 @@ de "población que delibera".
 
 - [x] Fase 0 — fundaciones y demo end-to-end
 - [x] Fase 1 — personas ancladas (demografía real + condicionales + OCEAN + RAG + validación)
-- [ ] Fase 2 — SSR + LLM real
+- [x] Fase 2 — SSR + LLM real (elicitación semántica intercambiable + Claude conectable)
 - [ ] Fase 3 — calibración/backtesting
 - [ ] Fase 4 — interfaz
 - [ ] Fase 5 — piloto

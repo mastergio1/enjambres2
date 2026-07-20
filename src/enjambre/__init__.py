@@ -7,7 +7,7 @@ reacciona, rankea variantes y estima la intención de compra antes de lanzar.
 from . import validacion
 from .calibracion import RegistroCalibracion
 from .conocimiento import BaseConocimiento, Documento, RecuperadorTFIDF
-from .elicitacion import SSR, ExtractorRating
+from .elicitacion import SSR, Embedder, EmbedderLexico, ExtractorRating
 from .enjambre import Enjambre, Reaccion, Resultado
 from .llm import AnthropicClient, LLMClient, MockLLMClient
 from .personas import GeneradorPersonas, Persona, Segmentacion
@@ -29,6 +29,8 @@ __all__ = [
     "AnthropicClient",
     "ExtractorRating",
     "SSR",
+    "Embedder",
+    "EmbedderLexico",
     "RegistroCalibracion",
     "validacion",
 ]

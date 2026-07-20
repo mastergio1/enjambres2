@@ -48,22 +48,24 @@ src/enjambre/
   personas.py      Personas ancladas en segmentos LATAM (demografía + condicionales + OCEAN + intereses)
   conocimiento.py  Capa RAG: aterriza personas en reseñas/tickets reales (recuperador TF-IDF)
   llm.py           Clientes de LLM intercambiables (Mock / Anthropic)
-  elicitacion.py   Intención de compra desde texto libre (ExtractorRating, SSR)
+  elicitacion.py   Intención de compra desde texto libre: ExtractorRating y método SSR (+ Embedder)
   enjambre.py      Orquestador: estímulo -> reacción colectiva (con RAG) -> ranking
   validacion.py    ¿La audiencia sintética reproduce la distribución objetivo?
   calibracion.py   Registro y correlación predicción vs. realidad (el foso)
 examples/demo.py         Demo end-to-end (Fase 0)
 examples/demo_fase1.py   Personas ancladas + validación + RAG (Fase 1)
+examples/demo_fase2.py   Método SSR + Claude real opcional (Fase 2)
 data/                    Segmentación y reseñas de ejemplo (reemplazar por datos del cliente)
-docs/                    Arquitectura y ficha de la idea #1
+docs/                    Contexto y casos de uso, arquitectura y ficha de la idea #1
 ```
 
 ## Estado
 
-Fases 0 y 1 completas: personas ancladas en datos demográficos reales (con
-distribuciones condicionales, priors OCEAN e intereses por segmento) y
-aterrizadas con RAG; la audiencia sintética reproduce la distribución objetivo.
-Próximo: Fase 2 (método SSR + Claude real). Ver `ROADMAP.md`.
+Fases 0, 1 y 2 completas: personas ancladas en datos demográficos reales y
+aterrizadas con RAG; medición de intención con el método **SSR** (similitud
+semántica, evita el sesgo del Likert directo); Claude real conectable con
+`ANTHROPIC_API_KEY`. Próximo: Fase 3 (motor de calibración/backtesting).
+Ver `ROADMAP.md`. Para el panorama del producto: `docs/contexto.md`.
 
 ## Requisitos
 

@@ -20,7 +20,7 @@ from .personas import GeneradorPersonas, Persona
 class Reaccion:
     persona: Persona
     texto: str
-    intencion: int | None
+    intencion: float | None
 
 
 @dataclass
@@ -28,7 +28,7 @@ class Resultado:
     estimulo: str
     reacciones: list[Reaccion]
 
-    def intenciones(self) -> list[int]:
+    def intenciones(self) -> list[float]:
         return [r.intencion for r in self.reacciones if r.intencion is not None]
 
     def media(self) -> float:
@@ -40,17 +40,18 @@ class Resultado:
         return pstdev(vals) if len(vals) > 1 else 0.0
 
     def distribucion(self) -> dict[int, int]:
+        """Cuenta por punto Likert (redondea la intención, que puede ser continua)."""
         dist = {i: 0 for i in range(1, 6)}
         for v in self.intenciones():
-            dist[v] += 1
+            dist[min(5, max(1, round(v)))] += 1
         return dist
 
     def top_2_box(self) -> float:
-        """% de la audiencia con intención alta (4-5). Métrica estándar de la industria."""
+        """% de la audiencia con intención alta (≈4-5). Métrica estándar de la industria."""
         vals = self.intenciones()
         if not vals:
             return 0.0
-        return 100 * sum(1 for v in vals if v >= 4) / len(vals)
+        return 100 * sum(1 for v in vals if v >= 3.5) / len(vals)
 
 
 class Enjambre:
@@ -58,13 +59,15 @@ class Enjambre:
         self,
         llm: LLMClient,
         generador: GeneradorPersonas | None = None,
-        extractor: ExtractorRating | None = None,
+        elicitador=None,
         conocimiento: BaseConocimiento | None = None,
         k_contexto: int = 3,
     ) -> None:
         self.llm = llm
         self.generador = generador or GeneradorPersonas()
-        self.extractor = extractor or ExtractorRating()
+        # elicitador: cualquier objeto con .intencion(texto) e .instruccion_prompt()
+        # (ExtractorRating por defecto; SSR para el método semántico).
+        self.elicitador = elicitador or ExtractorRating()
         self.conocimiento = conocimiento
         self.k_contexto = k_contexto
 
@@ -82,9 +85,7 @@ class Enjambre:
         ctx = f"\nContexto: {contexto}" if contexto else ""
         return (
             f"Te muestran esto:{ctx}\n\n\"{estimulo}\"\n\n"
-            "Reacciona en 1-2 frases con tu opinión sincera y luego indica tu "
-            "intención de compra en formato 'Intención de compra: X/5' "
-            "(1 = jamás, 5 = seguro lo compro)."
+            + self.elicitador.instruccion_prompt()
         )
 
     def reaccionar(
@@ -96,7 +97,9 @@ class Enjambre:
         for p in personas:
             evidencia = self._evidencia(estimulo, contexto, p)
             texto = self.llm.completar(p.system_prompt(evidencia), prompt, temperatura=temperatura)
-            reacciones.append(Reaccion(persona=p, texto=texto, intencion=self.extractor.extraer(texto)))
+            reacciones.append(
+                Reaccion(persona=p, texto=texto, intencion=self.elicitador.intencion(texto))
+            )
         return Resultado(estimulo=estimulo, reacciones=reacciones)
 
     def comparar(

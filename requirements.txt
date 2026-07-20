@@ -1,0 +1,13 @@
+# El núcleo y la demo (examples/demo.py) corren solo con la stdlib de Python 3.10+.
+# Estas dependencias se necesitan a partir de la Fase 2 (LLM real y SSR):
+
+anthropic>=0.40      # cliente de Claude (AnthropicClient)
+python-dotenv>=1.0   # cargar ANTHROPIC_API_KEY desde .env
+
+# Fase 2+ (elicitación SSR con embeddings / análisis):
+# numpy>=1.26
+# scikit-learn>=1.4
+
+# Fase 4 (API + interfaz):
+# fastapi>=0.110
+# uvicorn>=0.29

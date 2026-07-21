@@ -68,12 +68,23 @@ def _elicitador(metodo: str):
     return ExtractorRating()
 
 
-def _llm():
-    if os.environ.get("ANTHROPIC_API_KEY"):
-        from .llm import AnthropicClient
+_llm_singleton = None
 
-        return AnthropicClient(modelo="claude-sonnet-5")
-    return MockLLMClient()
+
+def _llm():
+    """Cliente LLM cacheado y persistente entre requests (repetir no gasta tokens)."""
+    global _llm_singleton
+    if _llm_singleton is None:
+        from .llm import LLMCache
+
+        if os.environ.get("ANTHROPIC_API_KEY"):
+            from .llm import AnthropicClient
+
+            base = AnthropicClient(modelo="claude-sonnet-5")
+        else:
+            base = MockLLMClient()
+        _llm_singleton = LLMCache(base)
+    return _llm_singleton
 
 
 def _normalizar_variantes(bruto) -> dict[str, str]:

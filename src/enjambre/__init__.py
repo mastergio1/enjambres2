@@ -21,7 +21,7 @@ from .elicitacion import ANCLAS_CHILE, SSR, Embedder, EmbedderLexico, ExtractorR
 from .embeddings import crear_embedder
 from .fuentes import cargar_opiniones_x
 from .enjambre import Enjambre, Reaccion, Resultado
-from .llm import AnthropicClient, LLMClient, MockLLMClient
+from .llm import AnthropicClient, LLMCache, LLMClient, MockLLMClient
 from .personas import GeneradorPersonas, Persona, Segmentacion
 
 __version__ = "0.4.0"
@@ -40,6 +40,7 @@ __all__ = [
     "LLMClient",
     "MockLLMClient",
     "AnthropicClient",
+    "LLMCache",
     "ExtractorRating",
     "SSR",
     "Embedder",

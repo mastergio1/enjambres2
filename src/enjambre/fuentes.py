@@ -30,6 +30,19 @@ def _norm_pais(pais: str) -> str:
     return _PAISES.get((pais or "").strip().lower(), pais)
 
 
+# Sentimientos que son memes/chistes, no opinión de producto: se excluyen del
+# corpus de DECISIÓN, pero no se borran (quedan separables y contables).
+def es_meme(doc: Documento) -> bool:
+    return (doc.tags.get("sentimiento") or "").lower().startswith("humor")
+
+
+def particionar_memes(docs: list[Documento]) -> tuple[list[Documento], list[Documento]]:
+    """Separa (opiniones_serias, memes) sin descartar nada."""
+    serios = [d for d in docs if not es_meme(d)]
+    memes = [d for d in docs if es_meme(d)]
+    return serios, memes
+
+
 def opiniones_x_a_documentos(datos: list[dict]) -> list[Documento]:
     """Aplana la estructura país → producto → opiniones a una lista de Documentos."""
     docs: list[Documento] = []
@@ -49,7 +62,17 @@ def opiniones_x_a_documentos(datos: list[dict]) -> list[Documento]:
     return docs
 
 
-def cargar_opiniones_x(ruta: str | Path) -> BaseConocimiento:
-    """Carga un JSON de opiniones de X (lista de bloques por país) como corpus RAG."""
+def cargar_opiniones_x(ruta: str | Path, excluir_memes: bool = True) -> BaseConocimiento:
+    """Carga opiniones de X como corpus RAG.
+
+    Por defecto excluye los memes/chistes (sentimiento ``humor*``) del corpus de
+    decisión. La base recuerda cuántos excluyó en ``base.memes_excluidos`` para
+    poder reportarlo (no se ocultan, se separan).
+    """
     datos = json.loads(Path(ruta).read_text(encoding="utf-8"))
-    return BaseConocimiento(opiniones_x_a_documentos(datos))
+    docs = opiniones_x_a_documentos(datos)
+    serios, memes = particionar_memes(docs)
+    base = BaseConocimiento(serios if excluir_memes else docs)
+    base.memes_excluidos = len(memes) if excluir_memes else 0
+    base.memes = memes  # disponibles aparte, nunca borrados
+    return base

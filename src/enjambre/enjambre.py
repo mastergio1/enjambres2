@@ -109,6 +109,7 @@ class Enjambre:
         cob = {
             "con_corpus": con_corpus,
             "docs_en_corpus": docs_corpus,
+            "memes_excluidos": getattr(self.conocimiento, "memes_excluidos", 0),
             "recuperados_promedio": round(total / n, 2),
             "personas_sin_evidencia": sin_evidencia,
             "por_segmento": por_segmento,

@@ -18,8 +18,12 @@ DATOS = RAIZ / "data"
 
 
 def main() -> None:
-    base = cargar_opiniones_x(DATOS / "opiniones_x_por_pais.json")
-    print(f"\n  Corpus RAG desde X: {len(base.documentos)} opiniones reales\n")
+    base = cargar_opiniones_x(DATOS / "opiniones_x_por_pais.json")  # excluye memes
+    print(f"\n  Corpus RAG desde X: {len(base.documentos)} opiniones serias "
+          f"({base.memes_excluidos} memes separados, no borrados)")
+    for m in base.memes:
+        print(f"   (meme fuera del corpus) [{m.tags.get('pais')}] {m.texto[:60]}...")
+    print()
 
     estimulo = "Detergente líquido concentrado, rinde más y cuida los colores"
     print(f"  Estímulo: {estimulo}")

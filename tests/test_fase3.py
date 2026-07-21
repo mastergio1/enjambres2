@@ -6,13 +6,11 @@ RAIZ = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(RAIZ / "src"))
 
 from enjambre import GeneradorChile, MockLLMClient, SSR, metricas  # noqa: E402
-from enjambre.backtest import (  # noqa: E402
-    ANCLAS_CHILE,
-    Backtest,
-    Item,
+from enjambre.backtest import ANCLAS_CHILE, Backtest, scoring  # noqa: E402
+from enjambre.dataset import (  # noqa: E402
+    EstimuloCiego,
     banda,
-    cargar_items,
-    scoring,
+    cargar_dataset_ejemplo,
     seleccion_estratificada,
 )
 
@@ -38,19 +36,21 @@ def test_persona_chile_prompt_no_pide_numero():
     assert "no des una nota" in sp.lower() or "NO des una nota" in sp
 
 
-def test_item_estimulo_es_ciego():
-    it = Item("x", "app", "Demo", "Cat", "una descripción", nota_real=4.6, n_resenas=900)
-    est = it.estimulo()
+def test_estimulo_ciego_no_tiene_campo_de_nota():
+    # Estructuralmente no hay dónde poner la nota (no es campo vacío: no existe).
+    campos = set(EstimuloCiego.__dataclass_fields__)
+    assert not any("nota" in c or "valor" in c or "resena" in c for c in campos)
+    e = EstimuloCiego("x", "app", "Demo", "Cat", "una descripción")
+    est = e.texto()
     assert "Demo" in est and "descripción" in est
-    assert "4.6" not in est and "900" not in est  # nota y nº reseñas ocultos
 
 
 def test_banda_y_estratificacion():
     assert banda(2.5) == "malo" and banda(3.5) == "medio"
     assert banda(4.2) == "bueno" and banda(4.7) == "excelente"
-    items = cargar_items(DATOS / "items_backtest.example.json")
-    sel = seleccion_estratificada(items, n=12, min_resenas=50, semilla=0)
-    bandas = {banda(it.nota_real) for it in sel}
+    dataset = cargar_dataset_ejemplo(DATOS / "items_backtest.example.json")
+    sel = seleccion_estratificada(dataset, n=12, min_muestras=50, semilla=0)
+    bandas = {banda(dataset.resultado(e.id)) for e in sel}
     assert len(bandas) >= 3  # cubre varios tramos, no solo notas altas
 
 
@@ -69,8 +69,8 @@ def test_ssr_promedio_de_varios_juegos():
 
 
 def test_backtest_corre_y_puntua():
-    items = cargar_items(DATOS / "items_backtest.example.json")
-    sel = seleccion_estratificada(items, n=8, min_resenas=50, semilla=0)
+    dataset = cargar_dataset_ejemplo(DATOS / "items_backtest.example.json")
+    sel = seleccion_estratificada(dataset, n=8, min_muestras=50, semilla=0)
     bt = Backtest(llm=MockLLMClient(), generador=_gen(), n_agentes=15)
     preds = bt.correr(sel, guardar_casos=True)
     assert len(preds) == len(sel)
@@ -78,7 +78,7 @@ def test_backtest_corre_y_puntua():
     # el formato de salida por caso existe y no filtra la nota real
     caso = preds[0].casos[0]
     assert "respuesta_texto" in caso and "ssr" in caso
-    sc = scoring(preds)
+    sc = scoring(preds, dataset)
     assert "correlacion_r" in sc and "similitud_forma" in sc
     assert sc["dispersion_muestra_std"] > 0  # muestra estratificada tiene dispersión
 

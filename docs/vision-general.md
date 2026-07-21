@@ -135,7 +135,7 @@ Resultado ──► media, top-2-box, dispersión, distribución, ranking A/B/n
 ```bash
 python -m enjambre.servidor                      # interfaz web (http://localhost:8000)
 python examples/demo.py                           # pre-test A/B/C offline
-python examples/demo_calibracion_real.py          # prueba de que el arnés detecta señal
+python examples/validar_arnes.py                  # valida el instrumento (no es calibración real)
 python -m enjambre.calibrar --embedder st --items <dataset_con_notas.json>  # calibración real
 ```
 
@@ -155,5 +155,9 @@ reproducible e interfaz web usable sin código. Siguiente: piloto con cliente.
   bajas como ~0.3); por eso se posiciona como early-warning, no oráculo.
 - Riesgo de **homogeneidad** de los agentes → se ancla en demografía real y se
   valida la varianza, no solo la media.
+- **No ve imágenes, solo texto.** Reacciona a la *descripción* de un anuncio, no
+  al anuncio (rostro, color, jerarquía visual, tipografía) → hereda el sesgo de
+  quien lo describe. Sí evalúa bien lo verbal (claims, mensajes, conceptos,
+  naming, precio); no evalúa el impacto visual de una pieza gráfica o un video.
 - Nota de internet ≠ conducta de compra; el arnés mide lo primero, que es una
   aproximación, no lo segundo.

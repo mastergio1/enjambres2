@@ -22,6 +22,14 @@ from statistics import mean, pstdev
 from .elicitacion import ANCLAS_CHILE, SSR
 from .llm import LLMClient
 from . import metricas
+from .dataset import (  # re-exportados por compatibilidad
+    DatasetCalibracion,
+    EstimuloCiego,
+    banda,
+    cargar_dataset_ciego,
+    cargar_dataset_ejemplo,
+    seleccion_estratificada,
+)
 
 
 # --------------------------------------------------------------------------- #
@@ -168,69 +176,11 @@ class GeneradorChile:
 
 
 # --------------------------------------------------------------------------- #
-# Ítems y selección estratificada
-# --------------------------------------------------------------------------- #
-@dataclass
-class Item:
-    id: str
-    tipo: str
-    nombre: str
-    categoria: str
-    descripcion: str
-    nota_real: float
-    n_resenas: int
-
-    def estimulo(self) -> str:
-        # Cegado: sin nota, sin nº de reseñas, sin ranking.
-        return (
-            f"ESTÍMULO — Mira esta {self.tipo} y reacciona como lo harías tú:\n\n"
-            f"Nombre: {self.nombre}\n"
-            f"Categoría: {self.categoria}\n"
-            f"Descripción:\n{self.descripcion}"
-        )
-
-
-def cargar_items(ruta: Path | str) -> list[Item]:
-    data = json.loads(Path(ruta).read_text(encoding="utf-8"))
-    return [Item(**d) for d in data]
-
-
-def banda(nota: float) -> str:
-    if nota <= 3.0:
-        return "malo"
-    if nota <= 3.9:
-        return "medio"
-    if nota <= 4.4:
-        return "bueno"
-    return "excelente"
-
-
-PROPORCION_BANDAS = {"malo": 0.20, "medio": 0.30, "bueno": 0.30, "excelente": 0.20}
-
-
-def seleccion_estratificada(
-    items: list[Item], n: int = 50, min_resenas: int = 50, semilla: int | None = 0
-) -> list[Item]:
-    """Reparte la muestra por todo el rango de nota real para fabricar dispersión."""
-    rng = random.Random(semilla)
-    candidatos = [it for it in items if it.n_resenas >= min_resenas]
-    por_banda: dict[str, list[Item]] = {b: [] for b in PROPORCION_BANDAS}
-    for it in candidatos:
-        por_banda[banda(it.nota_real)].append(it)
-    seleccion: list[Item] = []
-    for b, prop in PROPORCION_BANDAS.items():
-        grupo = por_banda[b][:]
-        rng.shuffle(grupo)
-        seleccion.extend(grupo[: max(0, round(prop * n))])
-    return seleccion
-
-
-# --------------------------------------------------------------------------- #
 # Backtest
 # --------------------------------------------------------------------------- #
 @dataclass
 class PrediccionItem:
-    item: Item
+    estimulo: EstimuloCiego  # NO contiene la nota real (se junta en el scoring)
     nota_predicha: float
     distribucion: list[float]  # media sobre [1,2,3,4,5]
     notas_agentes: list[float]
@@ -238,7 +188,11 @@ class PrediccionItem:
 
 
 class Backtest:
-    """Corre el arnés ciego sobre un conjunto de ítems y puntúa la calibración."""
+    """Corre el arnés ciego sobre estímulos ciegos y puntúa la calibración.
+
+    El enjambre solo recibe ``EstimuloCiego``: no hay dónde filtrar la nota. El
+    resultado real se junta con las predicciones únicamente en ``scoring``.
+    """
 
     def __init__(
         self,
@@ -254,8 +208,8 @@ class Backtest:
         self.n_agentes = n_agentes
         self.temperatura = temperatura
 
-    def predecir(self, item: Item, *, guardar_casos: bool = False) -> PrediccionItem:
-        prompt = f"{item.estimulo()}\n\n{ELICITACION_CHILE}"
+    def predecir(self, estimulo: EstimuloCiego, *, guardar_casos: bool = False) -> PrediccionItem:
+        prompt = f"{estimulo.texto()}\n\n{ELICITACION_CHILE}"
         acumulado = [0.0] * 5
         notas: list[float] = []
         casos: list[dict] = []
@@ -271,17 +225,19 @@ class Backtest:
             notas.append(nota)
             if guardar_casos:
                 casos.append({
-                    "agent_id": p.id, "item_id": item.id, "persona": p.resumen(),
+                    "agent_id": p.id, "item_id": estimulo.id, "persona": p.resumen(),
                     "respuesta_texto": texto,
                     "ssr": {"distribucion_likert": vec, "nota_esperada": nota},
                 })
         m = len(notas) or 1
         dist_media = [a / m for a in acumulado]
         nota_pred = sum(n * v for n, v in zip(range(1, 6), dist_media))
-        return PrediccionItem(item, nota_pred, dist_media, notas, casos)
+        return PrediccionItem(estimulo, nota_pred, dist_media, notas, casos)
 
-    def correr(self, items: list[Item], *, guardar_casos: bool = False) -> list[PrediccionItem]:
-        return [self.predecir(it, guardar_casos=guardar_casos) for it in items]
+    def correr(
+        self, estimulos: list[EstimuloCiego], *, guardar_casos: bool = False
+    ) -> list[PrediccionItem]:
+        return [self.predecir(e, guardar_casos=guardar_casos) for e in estimulos]
 
 
 # --------------------------------------------------------------------------- #
@@ -299,8 +255,9 @@ def _veredicto(r: float | None) -> str:
     return "NO FIABLE"
 
 
-def scoring(predicciones: list[PrediccionItem]) -> dict:
-    reales = [p.item.nota_real for p in predicciones]
+def scoring(predicciones: list[PrediccionItem], dataset: DatasetCalibracion) -> dict:
+    """Puntúa juntando cada predicción con la nota real de la clave (no del estímulo)."""
+    reales = [dataset.resultado(p.estimulo.id) for p in predicciones]
     pred = [p.nota_predicha for p in predicciones]
     r = metricas.pearson(pred, reales)
     disp_muestra = metricas.describe(reales)["std"]

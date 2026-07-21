@@ -17,20 +17,15 @@ RAIZ = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(RAIZ / "src"))
 
 from enjambre import GeneradorChile, MockLLMClient  # noqa: E402
-from enjambre.backtest import (  # noqa: E402
-    Backtest,
-    cargar_items,
-    reporte,
-    scoring,
-    seleccion_estratificada,
-)
+from enjambre.backtest import Backtest, reporte, scoring  # noqa: E402
+from enjambre.dataset import cargar_dataset_ejemplo, seleccion_estratificada  # noqa: E402
 
 DATOS = RAIZ / "data"
 
 
 def main() -> None:
-    items = cargar_items(DATOS / "items_backtest.example.json")
-    seleccion = seleccion_estratificada(items, n=12, min_resenas=50, semilla=0)
+    dataset = cargar_dataset_ejemplo(DATOS / "items_backtest.example.json")
+    seleccion = seleccion_estratificada(dataset, n=12, min_muestras=50, semilla=0)
     generador = GeneradorChile.desde_json(DATOS / "segmentos_chile.example.json", semilla=7)
 
     if os.environ.get("ANTHROPIC_API_KEY"):
@@ -52,11 +47,12 @@ def main() -> None:
     predicciones = bt.correr(seleccion)
 
     print("  Predicho vs real (ciego):")
-    for p in sorted(predicciones, key=lambda x: x.item.nota_real, reverse=True):
-        print(f"    {p.item.nombre:<18} real {p.item.nota_real:.1f}  ·  predicho {p.nota_predicha:.2f}")
+    for p in sorted(predicciones, key=lambda x: dataset.resultado(x.estimulo.id), reverse=True):
+        real = dataset.resultado(p.estimulo.id)
+        print(f"    {p.estimulo.nombre:<18} real {real:.1f}  ·  predicho {p.nota_predicha:.2f}")
 
     print()
-    print(reporte(scoring(predicciones)))
+    print(reporte(scoring(predicciones, dataset)))
     print()
 
 

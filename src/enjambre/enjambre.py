@@ -27,6 +27,7 @@ class Reaccion:
 class Resultado:
     estimulo: str
     reacciones: list[Reaccion]
+    cobertura_rag: dict | None = None  # se rellena en Enjambre.reaccionar
 
     def intenciones(self) -> list[float]:
         return [r.intencion for r in self.reacciones if r.intencion is not None]
@@ -74,12 +75,57 @@ class Enjambre:
     def _evidencia(self, estimulo: str, contexto: str, persona: Persona) -> list[str]:
         if not self.conocimiento:
             return []
+        tags = {}
+        pais = getattr(persona, "pais", None)
+        nse = getattr(persona, "nse", None)
+        if pais:
+            tags["pais"] = pais
+        if nse:
+            tags["nse"] = nse
         docs = self.conocimiento.recuperar(
             f"{estimulo} {contexto}".strip(),
             k=self.k_contexto,
-            tags_preferidos={"pais": persona.pais, "nse": persona.nse},
+            tags_preferidos=tags or None,
         )
         return [d.texto for d in docs]
+
+    def _cobertura(self, personas, evidencias: list[list[str]]) -> dict:
+        """Reporta cuánto se ancló cada persona en lenguaje real (nunca en silencio)."""
+        docs_corpus = len(self.conocimiento.documentos) if self.conocimiento else 0
+        n = len(personas) or 1
+        por_segmento: dict[str, dict] = {}
+        total = 0
+        sin_evidencia = 0
+        for p, ev in zip(personas, evidencias):
+            total += len(ev)
+            if not ev:
+                sin_evidencia += 1
+            seg = f"{getattr(p, 'pais', None) or getattr(p, 'region', '?')}/" \
+                  f"{getattr(p, 'nse', None) or getattr(p, 'gse', '?')}"
+            slot = por_segmento.setdefault(seg, {"consultas": 0, "recuperados": 0})
+            slot["consultas"] += 1
+            slot["recuperados"] += len(ev)
+        con_corpus = docs_corpus > 0
+        cob = {
+            "con_corpus": con_corpus,
+            "docs_en_corpus": docs_corpus,
+            "recuperados_promedio": round(total / n, 2),
+            "personas_sin_evidencia": sin_evidencia,
+            "por_segmento": por_segmento,
+            "advertencia": None,
+        }
+        if not con_corpus:
+            cob["advertencia"] = (
+                "Corpus RAG vacío: las personas están ancladas DEMOGRÁFICAMENTE "
+                "pero NO en lenguaje real (reseñas/tickets). Las reacciones salen "
+                "del pre-entrenamiento del modelo, no de datos del cliente."
+            )
+        elif total / n < 0.5:
+            cob["advertencia"] = (
+                f"Cobertura RAG muy baja ({total / n:.2f} docs/persona): la mayoría "
+                "de las personas no encontró lenguaje real relevante para este estímulo."
+            )
+        return cob
 
     def _prompt(self, estimulo: str, contexto: str) -> str:
         ctx = f"\nContexto: {contexto}" if contexto else ""
@@ -93,14 +139,20 @@ class Enjambre:
     ) -> Resultado:
         personas = self.generador.generar(n_personas)
         reacciones: list[Reaccion] = []
+        evidencias: list[list[str]] = []
         prompt = self._prompt(estimulo, contexto)
         for p in personas:
             evidencia = self._evidencia(estimulo, contexto, p)
+            evidencias.append(evidencia)
             texto = self.llm.completar(p.system_prompt(evidencia), prompt, temperatura=temperatura)
             reacciones.append(
                 Reaccion(persona=p, texto=texto, intencion=self.elicitador.intencion(texto))
             )
-        return Resultado(estimulo=estimulo, reacciones=reacciones)
+        return Resultado(
+            estimulo=estimulo,
+            reacciones=reacciones,
+            cobertura_rag=self._cobertura(personas, evidencias),
+        )
 
     def comparar(
         self, variantes: dict[str, str], *, n_personas: int = 30, contexto: str = ""

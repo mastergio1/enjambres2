@@ -85,7 +85,7 @@ El foso operativo: medir sistemáticamente qué tan bien predice el enjambre.
   (no gasta llamadas por agente); ✓ runner reproducible `calibrar.py` que
   persiste reporte JSON con metadata (semilla, versión de anclas, embedder,
   modelo, hash del dataset) y registra en la DB del foso; ✓ **autoverificación
-  offline** (`demo_calibracion_real.py`): un lector heurístico que SÍ lee da
+  offline** (`validar_arnes.py`): un lector heurístico que SÍ lee da
   r≈0.72 y supera al baseline, mientras el mock ciego da ~0 — prueba de que la
   máquina surface señal real cuando el lector comprende.
 - **Para el número real** (solo requiere recursos externos): `ANTHROPIC_API_KEY`

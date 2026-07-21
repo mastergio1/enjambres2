@@ -107,6 +107,12 @@ Detalle técnico en [`arquitectura.md`](arquitectura.md); plan por fases en
 - **Riesgo de homogeneidad**: los agentes tienden a parecerse entre sí más que
   los humanos reales; por eso anclamos en demografía real y validamos la
   varianza, no solo la media.
+- **El enjambre no ve imágenes, solo texto.** Un anuncio real es una imagen con
+  rostro, color, jerarquía visual y tipografía; hoy el enjambre reacciona a la
+  *descripción* del anuncio, no al anuncio, así que hereda el sesgo de quien
+  escribe esa descripción. **Sí evaluamos bien**: claims, mensajes, conceptos,
+  naming, propuesta de valor y precio (todo lo verbal). **No evaluamos**: el
+  impacto visual de una pieza gráfica, un empaque o un video.
 - **No sustituye la voz del cliente real** en decisiones de alto riesgo.
 
 El posicionamiento honesto —"te decimos dónde funciona y dónde no, y lo

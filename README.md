@@ -74,7 +74,7 @@ examples/demo.py                    Demo end-to-end (Fase 0)
 examples/demo_fase1.py              Personas ancladas + validación + RAG (Fase 1)
 examples/demo_fase2.py              Método SSR + Claude real opcional (Fase 2)
 examples/demo_fase3.py              Backtest de calibración ciego, foco Chile (Fase 3)
-examples/demo_calibracion_real.py   Autoverificación: el arnés detecta señal (offline)
+examples/validar_arnes.py           Valida el instrumento — NO es calibración real (offline)
 data/                    Segmentación, reseñas e ítems de ejemplo (reemplazar por datos del cliente)
 docs/                    Contexto y casos de uso, arquitectura, calibración e idea #1
 ```

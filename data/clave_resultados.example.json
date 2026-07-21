@@ -1,0 +1,14 @@
+[
+  {"id": "app01", "valoracion_real": 4.7, "fuente": "ejemplo-sintetico", "fecha": "2026-07-21", "n_muestras": 1820},
+  {"id": "app02", "valoracion_real": 4.6, "fuente": "ejemplo-sintetico", "fecha": "2026-07-21", "n_muestras": 640},
+  {"id": "app03", "valoracion_real": 4.5, "fuente": "ejemplo-sintetico", "fecha": "2026-07-21", "n_muestras": 980},
+  {"id": "app04", "valoracion_real": 4.2, "fuente": "ejemplo-sintetico", "fecha": "2026-07-21", "n_muestras": 3100},
+  {"id": "app05", "valoracion_real": 4.1, "fuente": "ejemplo-sintetico", "fecha": "2026-07-21", "n_muestras": 720},
+  {"id": "app06", "valoracion_real": 3.8, "fuente": "ejemplo-sintetico", "fecha": "2026-07-21", "n_muestras": 2500},
+  {"id": "app07", "valoracion_real": 3.6, "fuente": "ejemplo-sintetico", "fecha": "2026-07-21", "n_muestras": 450},
+  {"id": "app08", "valoracion_real": 3.4, "fuente": "ejemplo-sintetico", "fecha": "2026-07-21", "n_muestras": 310},
+  {"id": "app09", "valoracion_real": 3.1, "fuente": "ejemplo-sintetico", "fecha": "2026-07-21", "n_muestras": 5400},
+  {"id": "app10", "valoracion_real": 2.9, "fuente": "ejemplo-sintetico", "fecha": "2026-07-21", "n_muestras": 1200},
+  {"id": "app11", "valoracion_real": 2.5, "fuente": "ejemplo-sintetico", "fecha": "2026-07-21", "n_muestras": 890},
+  {"id": "app12", "valoracion_real": 2.1, "fuente": "ejemplo-sintetico", "fecha": "2026-07-21", "n_muestras": 660}
+]

@@ -1,17 +1,14 @@
-"""Autoverificación de la calibración (offline, sin llaves).
+"""VALIDACIÓN DEL ARNÉS (no es calibración real).
 
-El problema: con el LLM simulado (que no lee el estímulo) la correlación es ~0,
-así que no prueba que el arnés funcione cuando el lector SÍ comprende. Aquí
-usamos un LECTOR HEURÍSTICO que lee la descripción del ítem y reacciona según su
-sentimiento —una versión pobre de lo que hace Claude—. Si el arnés surface señal
-con este lector tonto-pero-que-lee, confiamos en que la cañería (persona ciega →
-reacción → SSR → agregación → scoring) está bien y lista para Claude real.
+Prueba que el instrumento de medición DETECTA SEÑAL cuando la hay. Con el LLM
+simulado (que no lee el estímulo) la correlación es ~0; con un lector heurístico
+que SÍ lee la descripción, el arnés surface señal (r>0). Eso confirma que la
+cañería (persona ciega → reacción → SSR → agregación → scoring) está bien.
 
-    python examples/demo_calibracion_real.py
+    python examples/validar_arnes.py
 
-Esto NO es un resultado de calibración: es una prueba de que la máquina detecta
-señal. El número real se mide con Claude + un embedder semántico sobre datos con
-nota real (ver README / docs/calibracion.md).
+Esto NO mide el desempeño del producto. El número real se obtiene con Claude +
+un embedder semántico sobre un dataset con notas reales (ver docs/calibracion.md).
 """
 import hashlib
 import sys
@@ -22,13 +19,8 @@ RAIZ = Path(__file__).resolve().parent.parent
 sys.path.insert(0, str(RAIZ / "src"))
 
 from enjambre import GeneradorChile, MockLLMClient  # noqa: E402
-from enjambre.backtest import (  # noqa: E402
-    Backtest,
-    cargar_items,
-    reporte,
-    scoring,
-    seleccion_estratificada,
-)
+from enjambre.backtest import Backtest, reporte, scoring  # noqa: E402
+from enjambre.dataset import cargar_dataset_ejemplo, seleccion_estratificada  # noqa: E402
 from enjambre.llm import LLMClient  # noqa: E402
 
 DATOS = RAIZ / "data"
@@ -42,8 +34,8 @@ def _norm(t: str) -> str:
 class LLMHeuristico(LLMClient):
     """Lector de juguete que SÍ lee la descripción y reacciona por sentimiento.
 
-    Stand-in offline de Claude para autoverificar el arnés. En producción se
-    reemplaza por AnthropicClient, que lee mucho mejor.
+    Stand-in offline de Claude para validar el arnés. es_real es False (heredado),
+    así una corrida con este lector JAMÁS se deduce como calibración real.
     """
 
     POS = ["ahorr", "seguro", "facil", "gratis", "util", "recuerda", "comunidad",
@@ -68,30 +60,32 @@ class LLMHeuristico(LLMClient):
         return self.FRASES[nivel]
 
 
-def _correr(llm, etiqueta, sel, generador, n=40):
-    preds = Backtest(llm=llm, generador=generador, n_agentes=n).correr(sel)
+def _correr(llm, etiqueta, estimulos, dataset, generador, n=40):
+    preds = Backtest(llm=llm, generador=generador, n_agentes=n).correr(estimulos)
     print(f"\n  === Lector: {etiqueta} ===")
-    print(reporte(scoring(preds)))
+    print(reporte(scoring(preds, dataset)))
     return preds
 
 
 def main() -> None:
-    items = cargar_items(DATOS / "items_backtest.example.json")
-    sel = seleccion_estratificada(items, n=12, min_resenas=50, semilla=0)
+    dataset = cargar_dataset_ejemplo(DATOS / "items_backtest.example.json")
+    estimulos = seleccion_estratificada(dataset, n=12, min_muestras=50, semilla=0)
     generador = GeneradorChile.desde_json(DATOS / "segmentos_chile.example.json", semilla=7)
 
-    print("\n  ENJAMBRE 2 · Autoverificación de calibración (offline)")
-    print(f"  Ítems estratificados: {len(sel)}")
+    print("\n  ENJAMBRE 2 · VALIDACIÓN DEL ARNÉS (no es calibración real)")
+    print(f"  Estímulos ciegos: {len(estimulos)}")
 
     # 1) Mock ciego: no lee → correlación ~0 (control negativo)
-    _correr(MockLLMClient(), "mock ciego (control negativo)", sel, generador)
+    _correr(MockLLMClient(), "mock ciego (control negativo)", estimulos, dataset, generador)
 
     # 2) Lector heurístico: lee la descripción → el arnés debe surface señal
-    preds = _correr(LLMHeuristico(), "heurístico que SÍ lee (prueba de máquina)", sel, generador)
+    preds = _correr(LLMHeuristico(), "heurístico que SÍ lee (prueba de máquina)",
+                    estimulos, dataset, generador)
 
     print("\n  Predicho vs real (lector heurístico):")
-    for p in sorted(preds, key=lambda x: x.item.nota_real, reverse=True):
-        print(f"    {p.item.nombre:<18} real {p.item.nota_real:.1f}  ·  predicho {p.nota_predicha:.2f}")
+    for p in sorted(preds, key=lambda x: dataset.resultado(x.estimulo.id), reverse=True):
+        real = dataset.resultado(p.estimulo.id)
+        print(f"    {p.estimulo.nombre:<18} real {real:.1f}  ·  predicho {p.nota_predicha:.2f}")
     print("\n  ▶ Si el heurístico ya surface señal, con Claude real (que lee mejor)")
     print("    el arnés está listo para medir la calibración de verdad.\n")
 

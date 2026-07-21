@@ -92,6 +92,8 @@
   summary { cursor: pointer; font-size: 13px; color: var(--accent-ink); }
   .muestra { font-size: 13px; color: var(--muted); border-left: 2px solid var(--line); padding-left: 10px; margin: 8px 0; font-style: italic; }
   .err { background: color-mix(in srgb, var(--crit) 10%, var(--surface)); border: 1px solid var(--crit); color: var(--crit); border-radius: 10px; padding: 12px 14px; font-size: 14px; }
+  .aviso { background: color-mix(in srgb, var(--crit) 8%, var(--surface)); border: 1px solid color-mix(in srgb, var(--crit) 40%, var(--line)); color: var(--ink); border-radius: 10px; padding: 11px 14px; font-size: 13px; margin-bottom: 14px; }
+  .aviso b { color: var(--crit); }
   .tools { display: flex; gap: 10px; margin-top: 4px; }
   .note { font-size: 12px; color: var(--muted); margin-top: 14px; }
   .spin { display: inline-block; width: 15px; height: 15px; border: 2px solid rgba(255,255,255,.5); border-top-color: #fff; border-radius: 50%; animation: g .7s linear infinite; vertical-align: -2px; }
@@ -214,7 +216,9 @@ function barrasDist(dist) {
 
 function render(data) {
   const gana = data.ganadora;
-  let html = `<div class="winner">▶ Recomendación del enjambre: lanzar <b>«${gana}»</b>. `
+  let html = (data.advertencias || []).map(a =>
+    `<div class="aviso"><b>⚠ Aviso metodológico:</b> ${a}</div>`).join("");
+  html += `<div class="winner">▶ Recomendación del enjambre: lanzar <b>«${gana}»</b>. `
     + `<span class="hint">Audiencia: ${data.n_personas} · ${OPC.mercados[data.mercado]} · LLM ${data.llm}</span></div>`;
   data.resultados.forEach((r, i) => {
     const muestras = r.muestras.filter(Boolean).map(m => `<p class="muestra">“${m}”</p>`).join("");

@@ -12,7 +12,16 @@ import os
 
 
 class LLMClient:
-    """Interfaz mínima que cualquier proveedor debe implementar."""
+    """Interfaz mínima que cualquier proveedor debe implementar.
+
+    ``es_real`` (lista blanca): un cliente cuenta como LLM real SOLO si lo
+    declara explícitamente. Por defecto es False, así cualquier cliente nuevo o
+    de prueba se trata como simulación hasta que alguien conscientemente lo
+    marque real. Esto protege contra el sesgo de optimismo: el error, si ocurre,
+    cae siempre del lado seguro (tratar como validación, no como calibración).
+    """
+
+    es_real: bool = False
 
     def completar(self, sistema: str, prompt: str, *, temperatura: float = 0.9) -> str:
         raise NotImplementedError
@@ -26,6 +35,8 @@ class MockLLMClient(LLMClient):
     producen distribuciones distintas *y reproducibles*, suficiente para
     validar el flujo del enjambre antes de gastar tokens reales.
     """
+
+    es_real = False  # determinista: nunca cuenta como LLM real
 
     _FRASES = [
         "no me dice nada, lo paso de largo",
@@ -44,6 +55,8 @@ class MockLLMClient(LLMClient):
 
 class AnthropicClient(LLMClient):
     """Cliente real contra la API de Claude. Requiere ``anthropic`` y ANTHROPIC_API_KEY."""
+
+    es_real = True  # único cliente marcado como LLM real
 
     def __init__(self, modelo: str = "claude-sonnet-5", api_key: str | None = None) -> None:
         try:

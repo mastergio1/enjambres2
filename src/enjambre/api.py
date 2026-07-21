@@ -117,6 +117,12 @@ def ejecutar_pretest(payload: dict) -> dict:
             "muestras": [r.texto.strip() for r in res.reacciones[:3]],
         })
 
+    # Cobertura RAG: nunca en silencio (Tarea 7).
+    cobertura = ranking[0][1].cobertura_rag if ranking else None
+    advertencias = []
+    if cobertura and cobertura.get("advertencia"):
+        advertencias.append(cobertura["advertencia"])
+
     return {
         "producto": producto,
         "contexto": contexto,
@@ -126,4 +132,6 @@ def ejecutar_pretest(payload: dict) -> dict:
         "llm": "claude" if os.environ.get("ANTHROPIC_API_KEY") else "simulado",
         "ganadora": resultados[0]["nombre"] if resultados else None,
         "resultados": resultados,
+        "cobertura_rag": cobertura,
+        "advertencias": advertencias,
     }

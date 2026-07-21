@@ -54,12 +54,36 @@ modelo GSE AIM 2023.
 # 1) Demo del arnés (LLM simulado, correlación ~0 a propósito)
 python examples/demo_fase3.py
 
-# 2) Autoverificación offline: prueba que la máquina detecta señal
-python examples/demo_calibracion_real.py
+# 2) Validación del arnés (no es calibración real): prueba que detecta señal
+python examples/validar_arnes.py
 #    → mock ciego: r≈0 (no supera baseline) | lector que SÍ lee: r≈0.72 (supera baseline)
 
 # 3) Runner reproducible (persiste reporte con metadata en data/reportes/)
+#    Con --items (ejemplo) o mock ⇒ el tipo se deduce VALIDACION_ARNES.
 python -m enjambre.calibrar --embedder lexico --items data/items_backtest.example.json
+```
+
+### Tipo de corrida: deducido, no declarado
+
+Cada corrida es `VALIDACION_ARNES` (mide el instrumento) o `CALIBRACION_REAL`
+(mide el producto). El tipo se **deduce del entorno**: si el LLM no es real
+(`MockLLMClient`) o el dataset no tiene procedencia externa no sintética, es
+validación, sin excepción. Los reportes se nombran por tipo
+(`VALIDACION-ARNES_*.json` / `CALIBRACION-REAL_*.json`) y los de validación
+abren con una advertencia de que **no** deben citarse como desempeño del
+producto. En la base de calibración, el track record (`correlacion_real`) opera
+solo sobre `CALIBRACION_REAL`.
+
+### Dataset real: dos archivos separados
+
+El dataset de calibración real llega en dos archivos que se cargan juntos y se
+validan (rechaza notas en los estímulos, IDs desalineados o falta de
+procedencia). El enjambre solo ve estímulos ciegos:
+
+```bash
+ANTHROPIC_API_KEY=... python -m enjambre.calibrar \
+    --estimulos data/estimulos_ciegos.example.json \
+    --clave data/clave_resultados.example.json --embedder st
 ```
 
 Con el **LLM simulado la correlación es ~0 a propósito**: el mock no lee el

@@ -42,11 +42,25 @@ def test_comparar_rankea():
     assert [n for n, _ in ranking] and ranking[0][1].media() >= ranking[-1][1].media()
 
 
-def test_calibracion_correlacion(tmp_path):
+def test_calibracion_correlacion_solo_real(tmp_path):
+    from enjambre import TipoCorrida
+
     reg = RegistroCalibracion(tmp_path / "cal.db")
+    # registros reales (buenos) + ruido de validación que NO debe contaminar
     for pred, real in [(2.0, 2.2), (3.0, 3.1), (4.0, 3.9), (5.0, 4.8)]:
-        i = reg.registrar_prediccion("caso", "est", pred)
+        i = reg.registrar_prediccion("caso", "est", pred, tipo=TipoCorrida.CALIBRACION_REAL)
         reg.registrar_real(i, real)
-    corr = reg.correlacion()
+    for pred, real in [(2.0, 5.0), (5.0, 1.0)]:  # validación con correlación invertida
+        i = reg.registrar_prediccion("caso", "est", pred, tipo=TipoCorrida.VALIDACION_ARNES)
+        reg.registrar_real(i, real)
+    corr = reg.correlacion_real()  # debe ignorar la validación
+    assert reg.contar(TipoCorrida.CALIBRACION_REAL) == 4
     reg.cerrar()
     assert corr is not None and corr > 0.9
+
+    # tipo obligatorio: no se puede registrar sin él
+    import pytest
+    reg2 = RegistroCalibracion(tmp_path / "cal2.db")
+    with pytest.raises(TypeError):
+        reg2.registrar_prediccion("caso", "est", 3.0)
+    reg2.cerrar()

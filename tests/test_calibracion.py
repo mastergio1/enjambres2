@@ -7,13 +7,9 @@ sys.path.insert(0, str(RAIZ / "src"))
 sys.path.insert(0, str(RAIZ / "examples"))
 
 from enjambre import GeneradorChile, MockLLMClient, crear_embedder  # noqa: E402
-from enjambre.backtest import (  # noqa: E402
-    Backtest,
-    cargar_items,
-    scoring,
-    seleccion_estratificada,
-)
+from enjambre.backtest import Backtest, scoring  # noqa: E402
 from enjambre.calibrar import correr_calibracion  # noqa: E402
+from enjambre.dataset import cargar_dataset_ejemplo, seleccion_estratificada  # noqa: E402
 from enjambre.elicitacion import EmbedderLexico  # noqa: E402
 
 DATOS = RAIZ / "data"
@@ -21,6 +17,10 @@ DATOS = RAIZ / "data"
 
 def _gen():
     return GeneradorChile.desde_json(DATOS / "segmentos_chile.example.json", semilla=7)
+
+
+def _dataset():
+    return cargar_dataset_ejemplo(DATOS / "items_backtest.example.json")
 
 
 def test_fabrica_embedder_lexico():
@@ -40,30 +40,34 @@ def test_fabrica_embedder_desconocido():
         crear_embedder("no-existe")
 
 
-def test_runner_persiste_reporte(tmp_path):
+def test_runner_persiste_reporte_de_validacion(tmp_path):
     rep, preds, destino = correr_calibracion(
-        DATOS / "items_backtest.example.json",
+        _dataset(),
         nombre_embedder="lexico", llm=MockLLMClient(),
         n_agentes=10, n_items=8, semilla=0,
         salida_dir=tmp_path, registrar=False,
     )
     assert destino.exists()
+    # dataset de ejemplo + mock ⇒ VALIDACION_ARNES, con advertencia y prefijo claro
+    assert rep["tipo_corrida"] == "VALIDACION_ARNES"
+    assert "_ADVERTENCIA" in rep
+    assert destino.name.startswith("VALIDACION-ARNES_")
     assert rep["metadata"]["embedder"] == "lexico"
-    assert rep["metadata"]["dataset_sha1"]
+    assert rep["metadata"]["sha1_estimulos"] and rep["metadata"]["sha1_clave"]
     assert rep["metadata"]["version_anclas"] == "ANCLAS_CHILE/v1"
     assert len(rep["items"]) == len(preds)
 
 
 def test_el_arnes_detecta_senal_con_lector_que_lee():
     """Control clave: mock ciego NO da señal; lector que comprende SÍ."""
-    from demo_calibracion_real import LLMHeuristico
+    from validar_arnes import LLMHeuristico
 
-    items = cargar_items(DATOS / "items_backtest.example.json")
-    sel = seleccion_estratificada(items, n=12, min_resenas=50, semilla=0)
+    dataset = _dataset()
+    sel = seleccion_estratificada(dataset, n=12, min_muestras=50, semilla=0)
 
     def r(llm):
         preds = Backtest(llm=llm, generador=_gen(), n_agentes=30).correr(sel)
-        return scoring(preds)
+        return scoring(preds, dataset)
 
     sc_ciego = r(MockLLMClient())
     sc_lee = r(LLMHeuristico())

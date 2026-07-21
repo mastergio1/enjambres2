@@ -70,13 +70,13 @@ def main() -> None:
         from enjambre import AnthropicClient
 
         print("  Reacción con Claude real (una persona):\n")
-        enj_real = Enjambre(
+        enj_claude = Enjambre(
             llm=AnthropicClient(modelo="claude-sonnet-5"),
             generador=GeneradorPersonas(seg, semilla=7),
             elicitador=ssr,
             conocimiento=base,
         )
-        res = enj_real.reaccionar(estimulo, n_personas=1, contexto="lanzamiento en México")
+        res = enj_claude.reaccionar(estimulo, n_personas=1, contexto="lanzamiento en México")
         r = res.reacciones[0]
         print(f"  Persona: {r.persona.descripcion()}")
         print(f"  Dijo: {r.texto.strip()}")

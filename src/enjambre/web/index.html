@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Enjambre 2 · Pre-test de audiencias</title>
+<style>
+  :root {
+    --bg: #f6f4ee; --surface: #fff; --surface2: #faf8f2; --ink: #1b1d21;
+    --muted: #5d626b; --line: #e5e2d8; --accent: #b8791a; --accent-ink: #7a4e08;
+    --accent-soft: #f2e5cb; --good: #2e8560; --crit: #b44b34;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #131519; --surface: #1c1f25; --surface2: #23272f; --ink: #ece9e1;
+      --muted: #9aa0a9; --line: #2c313a; --accent: #e4a63c; --accent-ink: #f0c878;
+      --accent-soft: #2e2515; --good: #46b98d; --crit: #e0795c;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--ink);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+    line-height: 1.55;
+  }
+  .wrap { max-width: 1080px; margin: 0 auto; padding: 28px 20px 80px; }
+  header { border-bottom: 1px solid var(--line); padding-bottom: 18px; margin-bottom: 26px; }
+  .brand { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+  h1 { font-size: 22px; margin: 0; letter-spacing: -.01em; }
+  h1 .bee { filter: saturate(1.1); }
+  .sub { color: var(--muted); font-size: 14px; margin: 6px 0 0; }
+  .badge {
+    font-size: 11px; font-family: ui-monospace, Menlo, Consolas, monospace;
+    padding: 3px 8px; border-radius: 999px; background: var(--accent-soft);
+    color: var(--accent-ink); margin-left: auto;
+  }
+  .grid { display: grid; grid-template-columns: 1fr; gap: 26px; }
+  @media (min-width: 900px) { .grid { grid-template-columns: 420px 1fr; align-items: start; } }
+  .card {
+    background: var(--surface); border: 1px solid var(--line); border-radius: 14px;
+    padding: 20px; box-shadow: 0 1px 2px rgba(0,0,0,.04), 0 10px 30px -18px rgba(0,0,0,.25);
+  }
+  label { display: block; font-size: 13px; font-weight: 600; margin: 0 0 6px; }
+  .hint { font-weight: 400; color: var(--muted); font-size: 12px; }
+  textarea, input, select {
+    width: 100%; font: inherit; color: inherit; background: var(--surface2);
+    border: 1px solid var(--line); border-radius: 9px; padding: 9px 11px; resize: vertical;
+  }
+  textarea:focus, input:focus, select:focus { outline: 2px solid var(--accent); border-color: transparent; }
+  .field { margin-bottom: 16px; }
+  .row { display: flex; gap: 12px; }
+  .row > * { flex: 1; }
+  .variante { display: flex; gap: 8px; align-items: flex-start; margin-bottom: 10px; }
+  .variante input.nombre { max-width: 120px; }
+  .variante textarea { min-height: 42px; }
+  .del {
+    background: none; border: 1px solid var(--line); color: var(--muted);
+    border-radius: 8px; cursor: pointer; padding: 8px 10px; font-size: 13px;
+  }
+  .del:hover { border-color: var(--crit); color: var(--crit); }
+  .link { background: none; border: none; color: var(--accent-ink); cursor: pointer; font: inherit; padding: 0; font-size: 13px; }
+  .btn {
+    background: var(--accent); color: #fff; border: none; border-radius: 10px;
+    padding: 12px 18px; font-size: 15px; font-weight: 700; cursor: pointer; width: 100%;
+  }
+  .btn:disabled { opacity: .55; cursor: default; }
+  .btn:hover:not(:disabled) { filter: brightness(1.05); }
+  .placeholder { color: var(--muted); font-size: 14px; text-align: center; padding: 40px 12px; }
+  .winner {
+    background: var(--accent-soft); border: 1px solid var(--accent); color: var(--accent-ink);
+    border-radius: 12px; padding: 12px 16px; margin-bottom: 16px; font-size: 14px;
+  }
+  .winner b { color: var(--accent-ink); }
+  .res {
+    border: 1px solid var(--line); border-radius: 12px; padding: 15px 16px;
+    margin-bottom: 12px; background: var(--surface);
+  }
+  .res.top { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent); }
+  .res-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; }
+  .res-head .nm { font-weight: 700; font-size: 15px; }
+  .rank { font-family: ui-monospace, Menlo, monospace; color: var(--muted); font-size: 12px; }
+  .metrics { display: flex; gap: 18px; margin: 8px 0 10px; flex-wrap: wrap; }
+  .metric .v { font-size: 20px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .metric .k { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+  .bar { height: 8px; background: var(--line); border-radius: 999px; overflow: hidden; }
+  .bar > span { display: block; height: 100%; background: var(--accent); }
+  .dist { display: flex; gap: 4px; align-items: flex-end; height: 46px; margin-top: 8px; }
+  .dist .col { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 3px; justify-content: flex-end; }
+  .dist .col .b { width: 100%; background: var(--accent); border-radius: 3px 3px 0 0; min-height: 2px; }
+  .dist .col .lb { font-size: 10px; color: var(--muted); font-family: ui-monospace, monospace; }
+  details { margin-top: 10px; }
+  summary { cursor: pointer; font-size: 13px; color: var(--accent-ink); }
+  .muestra { font-size: 13px; color: var(--muted); border-left: 2px solid var(--line); padding-left: 10px; margin: 8px 0; font-style: italic; }
+  .err { background: color-mix(in srgb, var(--crit) 10%, var(--surface)); border: 1px solid var(--crit); color: var(--crit); border-radius: 10px; padding: 12px 14px; font-size: 14px; }
+  .tools { display: flex; gap: 10px; margin-top: 4px; }
+  .note { font-size: 12px; color: var(--muted); margin-top: 14px; }
+  .spin { display: inline-block; width: 15px; height: 15px; border: 2px solid rgba(255,255,255,.5); border-top-color: #fff; border-radius: 50%; animation: g .7s linear infinite; vertical-align: -2px; }
+  @keyframes g { to { transform: rotate(360deg); } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <h1><span class="bee">🐝</span> Enjambre 2 — Pre-test de audiencias</h1>
+      <span class="badge" id="modo">LLM: …</span>
+    </div>
+    <p class="sub">Pega tu producto y sus variantes de mensaje. Un enjambre de consumidores sintéticos reacciona y las rankea por intención de compra — antes de gastar en medios.</p>
+  </header>
+
+  <div class="grid">
+    <!-- FORM -->
+    <form class="card" id="form">
+      <div class="field">
+        <label for="producto">Producto o servicio <span class="hint">— qué es</span></label>
+        <textarea id="producto" rows="2" placeholder="Ej.: Yogurt bebible de proteína, sin azúcar, en botella retornable"></textarea>
+      </div>
+
+      <div class="field">
+        <label>Variantes de mensaje <span class="hint">— qué quieres testear (A/B/n)</span></label>
+        <div id="variantes"></div>
+        <button type="button" class="link" id="add">+ Agregar variante</button>
+      </div>
+
+      <div class="field">
+        <label for="contexto">Contexto <span class="hint">— opcional (mercado, campaña…)</span></label>
+        <input id="contexto" placeholder="Ej.: lanzamiento en México y Colombia" />
+      </div>
+
+      <div class="field row">
+        <div>
+          <label for="mercado">Audiencia</label>
+          <select id="mercado"></select>
+        </div>
+        <div>
+          <label for="n">Tamaño</label>
+          <input id="n" type="number" min="1" max="200" value="40" />
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="metodo">Método de medición</label>
+        <select id="metodo"></select>
+      </div>
+
+      <button class="btn" id="go" type="submit">Reaccionar 🐝</button>
+      <p class="note" id="disclaimer"></p>
+    </form>
+
+    <!-- RESULTS -->
+    <section id="salida">
+      <div class="placeholder">Los resultados aparecerán aquí. Completa el formulario y pulsa <b>Reaccionar</b>.</div>
+    </section>
+  </div>
+</div>
+
+<script>
+const $ = (s) => document.querySelector(s);
+let OPC = null;
+
+function filaVariante(nombre = "", texto = "") {
+  const div = document.createElement("div");
+  div.className = "variante";
+  div.innerHTML = `
+    <input class="nombre" placeholder="Nombre" value="${nombre.replace(/"/g,'&quot;')}" />
+    <textarea class="texto" rows="1" placeholder="Texto del mensaje…">${texto}</textarea>
+    <button type="button" class="del" title="Quitar">✕</button>`;
+  div.querySelector(".del").onclick = () => div.remove();
+  return div;
+}
+
+async function init() {
+  OPC = await (await fetch("/api/opciones")).json();
+  $("#modo").textContent = "LLM: " + (OPC.llm === "claude" ? "Claude" : "simulado");
+  for (const [k, v] of Object.entries(OPC.mercados)) {
+    $("#mercado").insertAdjacentHTML("beforeend", `<option value="${k}">${v}</option>`);
+  }
+  for (const [k, v] of Object.entries(OPC.metodos)) {
+    $("#metodo").insertAdjacentHTML("beforeend", `<option value="${k}">${v}</option>`);
+  }
+  $("#n").max = OPC.n_personas_max;
+  $("#disclaimer").textContent = OPC.llm === "claude"
+    ? "Reacciones generadas por Claude sobre una audiencia sintética. Úsalo como señal, no como oráculo."
+    : "Modo simulado: los números son ilustrativos (define ANTHROPIC_API_KEY para usar Claude real).";
+  const cont = $("#variantes");
+  cont.appendChild(filaVariante("A", ""));
+  cont.appendChild(filaVariante("B", ""));
+}
+
+$("#add").onclick = () => $("#variantes").appendChild(filaVariante(String.fromCharCode(65 + $("#variantes").children.length), ""));
+
+function recolectar() {
+  const variantes = [...document.querySelectorAll(".variante")].map((v, i) => ({
+    nombre: v.querySelector(".nombre").value.trim() || String.fromCharCode(65 + i),
+    texto: v.querySelector(".texto").value.trim(),
+  }));
+  return {
+    producto: $("#producto").value.trim(),
+    contexto: $("#contexto").value.trim(),
+    variantes,
+    mercado: $("#mercado").value,
+    metodo: $("#metodo").value,
+    n_personas: parseInt($("#n").value) || 40,
+  };
+}
+
+function barrasDist(dist) {
+  const vals = [1,2,3,4,5].map(k => dist[k] || 0);
+  const max = Math.max(1, ...vals);
+  return `<div class="dist">${vals.map((v,i) =>
+    `<div class="col" title="${v} persona(s)"><div class="b" style="height:${Math.max(2, Math.round(v/max*34))}px"></div><div class="lb">${i+1}★</div></div>`
+  ).join("")}</div>`;
+}
+
+function render(data) {
+  const gana = data.ganadora;
+  let html = `<div class="winner">▶ Recomendación del enjambre: lanzar <b>«${gana}»</b>. `
+    + `<span class="hint">Audiencia: ${data.n_personas} · ${OPC.mercados[data.mercado]} · LLM ${data.llm}</span></div>`;
+  data.resultados.forEach((r, i) => {
+    const muestras = r.muestras.filter(Boolean).map(m => `<p class="muestra">“${m}”</p>`).join("");
+    html += `<div class="res ${i===0?'top':''}">
+      <div class="res-head"><span class="nm">${r.nombre}</span><span class="rank">#${i+1}</span></div>
+      <div class="metrics">
+        <div class="metric"><div class="v">${r.media.toFixed(2)}<span class="hint">/5</span></div><div class="k">intención</div></div>
+        <div class="metric"><div class="v">${r.top_2_box.toFixed(0)}%</div><div class="k">top-2-box</div></div>
+        <div class="metric"><div class="v">±${r.dispersion.toFixed(2)}</div><div class="k">dispersión</div></div>
+      </div>
+      <div class="bar"><span style="width:${r.top_2_box}%"></span></div>
+      ${barrasDist(r.distribucion)}
+      ${muestras ? `<details><summary>Ver reacciones de ejemplo</summary>${muestras}</details>` : ""}
+    </div>`;
+  });
+  html += `<div class="tools"><button class="link" id="dl">⬇ Descargar reporte (JSON)</button></div>`;
+  $("#salida").innerHTML = html;
+  $("#dl").onclick = () => {
+    const blob = new Blob([JSON.stringify(data, null, 2)], {type: "application/json"});
+    const a = document.createElement("a");
+    a.href = URL.createObjectURL(blob);
+    a.download = "pretest_enjambre.json";
+    a.click();
+  };
+}
+
+$("#form").onsubmit = async (e) => {
+  e.preventDefault();
+  const btn = $("#go");
+  btn.disabled = true; btn.innerHTML = 'Consultando al enjambre <span class="spin"></span>';
+  $("#salida").innerHTML = '<div class="placeholder">El enjambre está reaccionando…</div>';
+  try {
+    const resp = await fetch("/api/pretest", {
+      method: "POST", headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(recolectar()),
+    });
+    const data = await resp.json();
+    if (!resp.ok) throw new Error(data.error || "Error");
+    render(data);
+  } catch (err) {
+    $("#salida").innerHTML = `<div class="err">⚠ ${err.message}</div>`;
+  } finally {
+    btn.disabled = false; btn.textContent = "Reaccionar 🐝";
+  }
+};
+
+init();
+</script>
+</body>
+</html>

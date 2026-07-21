@@ -9,6 +9,17 @@ rankea variantes A/B y estima la intención de compra en minutos, no semanas.
 > y la lleva a un nuevo rubro. Ver [`ROADMAP.md`](ROADMAP.md) para el plan por
 > fases y `docs/` para el detalle de arquitectura y de la idea.
 
+## Interfaz web (sube y reacciona)
+
+```bash
+python -m enjambre.servidor --port 8000   # abre http://localhost:8000
+```
+
+Pega tu producto y sus variantes de mensaje, elige la audiencia (LATAM o Chile)
+y el tamaño, y recibe el ranking por intención de compra + distribución +
+reacciones de ejemplo, con export a JSON. Corre sin dependencias (stdlib) y sin
+llaves (LLM simulado); con `ANTHROPIC_API_KEY` usa Claude real.
+
 ## Demo rápida (sin API keys)
 
 ```bash
@@ -54,6 +65,9 @@ src/enjambre/
   embeddings.py    Embedders semánticos reales (SentenceTransformers/OpenAI/Voyage) + fábrica
   calibrar.py      Runner reproducible: corre el backtest y persiste reporte con metadata
   metricas.py      Correlación, forma de distribución (KS), MAE, baseline tonto
+  api.py           Lógica de la interfaz "sube y reacciona" (independiente de HTTP)
+  servidor.py      Servidor stdlib que expone la API y sirve la web UI
+  web/index.html   Interfaz web (responsive, claro/oscuro)
   validacion.py    ¿La audiencia sintética reproduce la distribución objetivo?
   calibracion.py   Registro y correlación predicción vs. realidad (el foso)
 examples/demo.py                    Demo end-to-end (Fase 0)
@@ -67,16 +81,14 @@ docs/                    Contexto y casos de uso, arquitectura, calibración e i
 
 ## Estado
 
-Fases 0–3 completas (calibración cerrada): personas ancladas en datos
-demográficos reales (LATAM y Chile) y aterrizadas con RAG; medición de intención
-con el método **SSR** (embedders semánticos reales enchufables); **arnés de
-backtest ciego** con muestreo estratificado, doble métrica y controles
-anti-autoengaño; **runner reproducible** que persiste reportes con metadata. La
-autoverificación offline confirma que el arnés detecta señal (r≈0.72 con un
-lector que comprende vs ~0 con el mock ciego). Claude real conectable con
-`ANTHROPIC_API_KEY`. Próximo: Fase 4 (interfaz "sube y reacciona").
-Ver `ROADMAP.md`. Panorama del producto: `docs/contexto.md`; método de
-calibración: `docs/calibracion.md`.
+Fases 0–4 completas: personas ancladas en datos demográficos reales (LATAM y
+Chile) y aterrizadas con RAG; medición de intención con el método **SSR**
+(embedders semánticos reales enchufables); **arnés de backtest ciego** con doble
+métrica y controles anti-autoengaño; **runner de calibración reproducible**; e
+**interfaz web "sube y reacciona"** (API + UI) que cualquiera puede usar sin
+código. Claude real conectable con `ANTHROPIC_API_KEY`. Próximo: Fase 5 (piloto
+con cliente). Ver `ROADMAP.md`. Panorama del producto: `docs/contexto.md`;
+método de calibración: `docs/calibracion.md`.
 
 ## Correr la calibración real
 

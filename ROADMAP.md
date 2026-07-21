@@ -92,11 +92,17 @@ El foso operativo: medir sistemáticamente qué tan bien predice el enjambre.
   + un embedder semántico (`pip install sentence-transformers`) + un dataset con
   nota real. Comando: `python -m enjambre.calibrar --embedder st --items <tu.json>`.
 
-### Fase 4 — Interfaz "sube y reacciona" *(~2–3 sem)*
+### ✅ Fase 4 — Interfaz "sube y reacciona" *(completa)*
 Que un no-técnico suba un creativo/mensaje y reciba la reacción + ranking.
-- **Entregables:** API (FastAPI) + UI web simple; export de reporte; soporte de
-  variantes A/B/n; segmentación configurable desde la UI.
-- **Éxito:** un usuario externo completa el flujo (subir → resultado) sin ayuda.
+- **Entregables:** ✓ API JSON + servidor (`api.py` + `servidor.py`, stdlib sin
+  dependencias; lógica separada del transporte para migrar a FastAPI si hace
+  falta); ✓ UI web (`web/index.html`) responsive con modo claro/oscuro;
+  ✓ variantes A/B/n dinámicas; ✓ segmentación configurable desde la UI
+  (mercado LATAM/Chile, tamaño, método rápido/SSR); ✓ export del reporte a JSON;
+  ✓ muestra reacciones de ejemplo y distribución. `python -m enjambre.servidor`.
+- **Éxito:** ✓ un usuario externo completa el flujo (pegar producto + variantes →
+  ranking con intención, top-2-box y distribución) sin tocar código. Verificado
+  end-to-end por HTTP (test) y con captura real de la UI vía Chromium.
 
 ### Fase 5 — Piloto con primer cliente LATAM *(~3–4 sem)*
 Validación real con un cliente y un dataset de calibración propio.
@@ -139,6 +145,6 @@ de "población que delibera".
 - [x] Fase 1 — personas ancladas (demografía real + condicionales + OCEAN + RAG + validación)
 - [x] Fase 2 — SSR + LLM real (elicitación semántica intercambiable + Claude conectable)
 - [x] Fase 3 — calibración/backtesting (arnés ciego Chile + doble métrica + anti-autoengaño)
-- [ ] Fase 4 — interfaz
+- [x] Fase 4 — interfaz web "sube y reacciona" (API + UI + export + variantes A/B/n)
 - [ ] Fase 5 — piloto
 - [ ] Fase 6 — empaquetado y siguientes rubros

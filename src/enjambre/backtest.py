@@ -110,6 +110,10 @@ class PersonaChile:
     sensibilidad_precio: str
     canal: str
 
+    @property
+    def pais(self) -> str:  # las personas chilenas son de Chile (para el anclaje RAG)
+        return "Chile"
+
     def perfil(self) -> str:
         return (
             "PERFIL:\n"

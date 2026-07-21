@@ -58,6 +58,7 @@ enjambre = Enjambre(llm=AnthropicClient(modelo="claude-sonnet-5"))  # requiere A
 src/enjambre/
   personas.py      Personas ancladas en segmentos LATAM (demografía + condicionales + OCEAN + intereses)
   conocimiento.py  Capa RAG: aterriza personas en reseñas/tickets reales (recuperador TF-IDF)
+  fuentes.py       Adaptadores de fuentes externas al corpus RAG (p. ej. opiniones de X)
   llm.py           Clientes de LLM intercambiables (Mock / Anthropic)
   elicitacion.py   Intención de compra desde texto libre: ExtractorRating y método SSR (+ Embedder)
   enjambre.py      Orquestador: estímulo -> reacción colectiva (con RAG) -> ranking

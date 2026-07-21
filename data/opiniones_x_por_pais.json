@@ -1,0 +1,97 @@
+[
+  {
+    "pais": "Mexico",
+    "productos": {
+      "detergente": [
+        {
+          "text": "PROFECO dio a conocer cuáles son los jabones y detergentes que destacan por su calidad, efectividad y precio en México. Algunas marcas económicas sorprendieron.",
+          "sentimiento": "positivo",
+          "engagement": 10,
+          "fecha": "2026-05-25"
+        },
+        {
+          "text": "A mi me urge que la gente vea más allá... nunca falta el único detergente gluten free.",
+          "sentimiento": "neutro",
+          "engagement": 17
+        }
+      ],
+      "shampoo": [
+        {
+          "text": "Seguro alguien... que les eché laxante en la comida, que les quiten el agua, que algun otro se venga en el shampoo.",
+          "sentimiento": "negativo",
+          "engagement": 51
+        }
+      ],
+      "cafe": [
+        {
+          "text": "Un proyecto que permite el intercambio justo con cafetaleros en Chiapas.",
+          "sentimiento": "positivo"
+        }
+      ]
+    },
+    "total_opiniones": 45
+  },
+  {
+    "pais": "Argentina",
+    "productos": {
+      "detergente": [
+        {
+          "text": "Se me terminó el detergente y tengo que empezar el de la selección Argentina.",
+          "sentimiento": "humor",
+          "engagement": 9
+        },
+        {
+          "text": "la gente que dice que argentina compra los partidos si tan solo supieran que le ponemos agua al shampoo",
+          "sentimiento": "humor_economico",
+          "engagement": 63
+        }
+      ],
+      "leche": [
+        {
+          "text": "El consumo de leche y productos lácteos en los hogares de Argentina registra mínimos históricos.",
+          "sentimiento": "negativo",
+          "engagement": 22
+        }
+      ],
+      "shampoo": [
+        {
+          "text": "le tiras agua al shampoo cuando se acaba",
+          "sentimiento": "humor_economico"
+        }
+      ]
+    },
+    "total_opiniones": 40
+  },
+  {
+    "pais": "Chile",
+    "productos": {
+      "cafe": [
+        {
+          "text": "Comparando: 200grs de café en Chile desde $4.500. Huevos desde $3.200... Detergente omo desde $4.290.",
+          "sentimiento": "neutro_precio",
+          "engagement": 1
+        }
+      ],
+      "leche": [
+        {
+          "text": "Impresionante la dispersión de precios en el rubro lechero Chileno.",
+          "sentimiento": "negativo"
+        }
+      ]
+    },
+    "total_opiniones": 20
+  },
+  {
+    "pais": "Colombia",
+    "productos": {
+      "jabon": [
+        {
+          "text": "Ya pagué las cuentas... ahora sí a relajarme... La vida: Oigan a este, ya se te acabó el jabón, la crema de dientes, el shampoo.",
+          "sentimiento": "humor",
+          "engagement": 3
+        }
+      ]
+    },
+    "total_opiniones": 15
+  }
+]

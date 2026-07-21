@@ -19,6 +19,7 @@ from .dataset import (
 )
 from .elicitacion import ANCLAS_CHILE, SSR, Embedder, EmbedderLexico, ExtractorRating
 from .embeddings import crear_embedder
+from .fuentes import cargar_opiniones_x
 from .enjambre import Enjambre, Reaccion, Resultado
 from .llm import AnthropicClient, LLMClient, MockLLMClient
 from .personas import GeneradorPersonas, Persona, Segmentacion
@@ -35,6 +36,7 @@ __all__ = [
     "BaseConocimiento",
     "Documento",
     "RecuperadorTFIDF",
+    "cargar_opiniones_x",
     "LLMClient",
     "MockLLMClient",
     "AnthropicClient",

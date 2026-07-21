@@ -13,11 +13,23 @@ from pathlib import Path
 from .backtest import GeneradorChile
 from .elicitacion import ANCLAS_CHILE, SSR, ExtractorRating
 from .enjambre import Enjambre
+from .fuentes import cargar_opiniones_x
 from .llm import MockLLMClient
 from .personas import GeneradorPersonas, Segmentacion
 
 RAIZ = Path(__file__).resolve().parents[2]
 DATOS = RAIZ / "data"
+
+_corpus = None  # corpus RAG cargado una sola vez
+
+
+def _conocimiento():
+    """Corpus de opiniones reales (X). Se carga perezosamente; None si no existe."""
+    global _corpus
+    if _corpus is None:
+        ruta = DATOS / "opiniones_x_por_pais.json"
+        _corpus = cargar_opiniones_x(ruta) if ruta.exists() else False
+    return _corpus or None
 
 MERCADOS = {
     "latam": "LATAM (general, español)",
@@ -101,7 +113,8 @@ def ejecutar_pretest(payload: dict) -> dict:
     contexto = (payload.get("contexto") or "").strip()
 
     enjambre = Enjambre(
-        llm=_llm(), generador=_generador(mercado), elicitador=_elicitador(metodo)
+        llm=_llm(), generador=_generador(mercado), elicitador=_elicitador(metodo),
+        conocimiento=_conocimiento(),
     )
     ctx = f"{producto}. {contexto}".strip().strip(".")
     ranking = enjambre.comparar(variantes, n_personas=n, contexto=ctx)

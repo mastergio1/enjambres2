@@ -78,8 +78,19 @@ El foso operativo: medir sistemáticamente qué tan bien predice el enjambre.
   agentes). Ver `docs/calibracion.md` y `examples/demo_fase3.py`.
 - **Éxito:** ✓ el arnés corre end-to-end y reporta la doble métrica; con LLM
   simulado da correlación ~0 y los controles lo detectan (no supera al baseline)
-  — prueba de que no hace trampa. *Pendiente para producción:* correr con Claude
-  real + embedder semántico sobre un dataset con nota real (meta r ≥ 0.70).
+  — prueba de que no hace trampa.
+- **Cierre de calibración real:** ✓ embedders semánticos reales enchufables
+  (`embeddings.py`: SentenceTransformers / OpenAI / Voyage) con fábrica
+  `crear_embedder` (por nombre o `ENJAMBRE_EMBEDDER`); ✓ SSR cachea las anclas
+  (no gasta llamadas por agente); ✓ runner reproducible `calibrar.py` que
+  persiste reporte JSON con metadata (semilla, versión de anclas, embedder,
+  modelo, hash del dataset) y registra en la DB del foso; ✓ **autoverificación
+  offline** (`demo_calibracion_real.py`): un lector heurístico que SÍ lee da
+  r≈0.72 y supera al baseline, mientras el mock ciego da ~0 — prueba de que la
+  máquina surface señal real cuando el lector comprende.
+- **Para el número real** (solo requiere recursos externos): `ANTHROPIC_API_KEY`
+  + un embedder semántico (`pip install sentence-transformers`) + un dataset con
+  nota real. Comando: `python -m enjambre.calibrar --embedder st --items <tu.json>`.
 
 ### Fase 4 — Interfaz "sube y reacciona" *(~2–3 sem)*
 Que un no-técnico suba un creativo/mensaje y reciba la reacción + ranking.

@@ -20,6 +20,7 @@ semántico real (Voyage AI, sentence-transformers, etc.) sin tocar el resto.
 """
 from __future__ import annotations
 
+import hashlib
 import math
 import re
 import unicodedata
@@ -65,38 +66,51 @@ class ExtractorRating:
 # Embedders
 # --------------------------------------------------------------------------- #
 class Embedder:
-    """Interfaz de embeddings. Devuelve un vector por texto."""
+    """Interfaz de embeddings: devuelve un vector denso (list[float]) por texto.
 
-    def embed(self, textos: list[str]) -> list[dict[str, float]]:
+    Los adaptadores reales (SentenceTransformers, OpenAI, Voyage) viven en
+    ``enjambre.embeddings`` y respetan esta misma interfaz.
+    """
+
+    def embed(self, textos: list[str]) -> list[list[float]]:
         raise NotImplementedError
 
 
 class EmbedderLexico(Embedder):
-    """Embedder offline determinista (bolsa de palabras TF normalizada).
+    """Embedder offline determinista: bolsa de palabras con *feature hashing* a
+    un vector denso L2-normalizado.
 
-    NO es semántico: sirve para desarrollo y tests sin dependencias ni llaves.
-    En producción se reemplaza por embeddings reales; la interfaz no cambia.
+    NO es semántico (no distingue "me sirve" de "no me sirve"): sirve para
+    desarrollo y tests sin dependencias ni llaves. En producción se reemplaza
+    por un embedder semántico real (``enjambre.embeddings.crear_embedder``); la
+    interfaz no cambia.
     """
 
-    def embed(self, textos: list[str]) -> list[dict[str, float]]:
-        vecs: list[dict[str, float]] = []
+    nombre = "lexico"
+
+    def __init__(self, dim: int = 2048) -> None:
+        self.dim = dim
+
+    def _rasgo(self, palabra: str) -> tuple[int, float]:
+        h = int(hashlib.md5(palabra.encode("utf-8")).hexdigest(), 16)
+        return h % self.dim, (1.0 if (h >> 17) & 1 else -1.0)
+
+    def embed(self, textos: list[str]) -> list[list[float]]:
+        vecs: list[list[float]] = []
         for t in textos:
-            toks = _tokenizar(t)
-            vec: dict[str, float] = {}
-            if toks:
-                for w in toks:
-                    vec[w] = vec.get(w, 0.0) + 1.0 / len(toks)
-            vecs.append(vec)
+            v = [0.0] * self.dim
+            for w in _tokenizar(t):
+                idx, signo = self._rasgo(w)
+                v[idx] += signo
+            norma = math.sqrt(sum(x * x for x in v))
+            vecs.append([x / norma for x in v] if norma else v)
         return vecs
 
 
-def _coseno(a: dict[str, float], b: dict[str, float]) -> float:
-    if not a or not b:
-        return 0.0
-    comun = set(a) & set(b)
-    num = sum(a[w] * b[w] for w in comun)
-    na = math.sqrt(sum(v * v for v in a.values()))
-    nb = math.sqrt(sum(v * v for v in b.values()))
+def _coseno(a: list[float], b: list[float]) -> float:
+    num = sum(x * y for x, y in zip(a, b))
+    na = math.sqrt(sum(x * x for x in a))
+    nb = math.sqrt(sum(x * x for x in b))
     return num / (na * nb) if na and nb else 0.0
 
 
@@ -150,16 +164,19 @@ class SSR:
             conjuntos = [anclas]
         else:
             conjuntos = list(anclas)
-        self._conjuntos = [(sorted(c), [c[n] for n in sorted(c)]) for c in conjuntos]
+        # Precalcula (cachea) los embeddings de las anclas una sola vez: por cada
+        # reacción solo se embebe la respuesta, no las anclas.
+        self._conjuntos = [
+            (sorted(c), self.embedder.embed([c[n] for n in sorted(c)])) for c in conjuntos
+        ]
 
     def distribucion(self, respuesta: str) -> dict[int, float]:
         if not respuesta or not respuesta.strip():
             return {}
+        resp = self.embedder.embed([respuesta])[0]
         acumulado: dict[int, float] = {}
-        for niveles, textos in self._conjuntos:
-            vecs = self.embedder.embed(textos + [respuesta])
-            anclas, resp = vecs[:-1], vecs[-1]
-            sims = [_coseno(resp, a) for a in anclas]
+        for niveles, anclas_emb in self._conjuntos:
+            sims = [_coseno(resp, a) for a in anclas_emb]
             pesos = [math.exp(self.nitidez * s) for s in sims]
             total = sum(pesos) or 1.0
             for n, p in zip(niveles, pesos):

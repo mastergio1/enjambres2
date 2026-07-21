@@ -4,11 +4,13 @@ Producto núcleo de Rubicon Lab: subes un anuncio, concepto o mensaje y un
 enjambre de consumidores sintéticos calibrados para mercados latinos
 reacciona, rankea variantes y estima la intención de compra antes de lanzar.
 """
-from . import backtest, metricas, validacion
+from . import backtest, calibrar, embeddings, metricas, validacion
 from .backtest import Backtest, GeneradorChile, Item, PersonaChile
 from .calibracion import RegistroCalibracion
+from .calibrar import correr_calibracion
 from .conocimiento import BaseConocimiento, Documento, RecuperadorTFIDF
 from .elicitacion import ANCLAS_CHILE, SSR, Embedder, EmbedderLexico, ExtractorRating
+from .embeddings import crear_embedder
 from .enjambre import Enjambre, Reaccion, Resultado
 from .llm import AnthropicClient, LLMClient, MockLLMClient
 from .personas import GeneradorPersonas, Persona, Segmentacion
@@ -38,7 +40,11 @@ __all__ = [
     "GeneradorChile",
     "PersonaChile",
     "Item",
+    "crear_embedder",
+    "correr_calibracion",
     "validacion",
     "metricas",
     "backtest",
+    "embeddings",
+    "calibrar",
 ]

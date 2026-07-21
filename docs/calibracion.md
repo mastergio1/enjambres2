@@ -51,13 +51,50 @@ modelo GSE AIM 2023.
 ## Cómo correrlo
 
 ```bash
-python examples/demo_fase3.py                          # LLM simulado (offline)
-ANTHROPIC_API_KEY=... python examples/demo_fase3.py    # con Claude real
+# 1) Demo del arnés (LLM simulado, correlación ~0 a propósito)
+python examples/demo_fase3.py
+
+# 2) Autoverificación offline: prueba que la máquina detecta señal
+python examples/demo_calibracion_real.py
+#    → mock ciego: r≈0 (no supera baseline) | lector que SÍ lee: r≈0.72 (supera baseline)
+
+# 3) Runner reproducible (persiste reporte con metadata en data/reportes/)
+python -m enjambre.calibrar --embedder lexico --items data/items_backtest.example.json
 ```
 
 Con el **LLM simulado la correlación es ~0 a propósito**: el mock no lee el
 estímulo, así que no puede predecir. Eso confirma que el arnés no hace trampa —
 la señal solo aparece con un LLM real que razona sobre el texto.
+
+### Embedders (elicitación SSR)
+
+El SSR necesita un embedder. Selección por nombre o `ENJAMBRE_EMBEDDER`:
+
+| Nombre | Qué es | Requisito |
+|--------|--------|-----------|
+| `lexico` | Bolsa de palabras con hashing (offline, **no semántico**) | ninguno — solo dev/tests |
+| `st` | SentenceTransformers multilingüe (local, **semántico**) | `pip install sentence-transformers` |
+| `openai` | `text-embedding-3-small` (el sugerido por SSR) | `pip install openai` + `OPENAI_API_KEY` |
+| `voyage` | Voyage AI (partner de Anthropic) | `pip install voyageai` + `VOYAGE_API_KEY` |
+
+```python
+from enjambre import crear_embedder, SSR
+from enjambre.elicitacion import ANCLAS_CHILE
+ssr = SSR(embedder=crear_embedder("st"), anclas=ANCLAS_CHILE)
+```
+
+### Correr el número real
+
+Solo requiere recursos externos (llave + embedder semántico + dataset con nota real):
+
+```bash
+pip install sentence-transformers
+ANTHROPIC_API_KEY=... python -m enjambre.calibrar \
+    --embedder st --items data/tu_dataset_con_notas.json --n-agentes 100 --n-items 50
+```
+
+El reporte queda en `data/reportes/calibracion_<fecha>.json` con toda la metadata
+de reproducibilidad (semilla, versión de anclas, embedder, modelo, hash del dataset).
 
 ## Límites honestos (declarados)
 

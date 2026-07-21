@@ -51,26 +51,40 @@ src/enjambre/
   elicitacion.py   Intención de compra desde texto libre: ExtractorRating y método SSR (+ Embedder)
   enjambre.py      Orquestador: estímulo -> reacción colectiva (con RAG) -> ranking
   backtest.py      Arnés de calibración ciego (persona Chile + SSR + estratificación)
+  embeddings.py    Embedders semánticos reales (SentenceTransformers/OpenAI/Voyage) + fábrica
+  calibrar.py      Runner reproducible: corre el backtest y persiste reporte con metadata
   metricas.py      Correlación, forma de distribución (KS), MAE, baseline tonto
   validacion.py    ¿La audiencia sintética reproduce la distribución objetivo?
   calibracion.py   Registro y correlación predicción vs. realidad (el foso)
-examples/demo.py         Demo end-to-end (Fase 0)
-examples/demo_fase1.py   Personas ancladas + validación + RAG (Fase 1)
-examples/demo_fase2.py   Método SSR + Claude real opcional (Fase 2)
-examples/demo_fase3.py   Backtest de calibración ciego, foco Chile (Fase 3)
+examples/demo.py                    Demo end-to-end (Fase 0)
+examples/demo_fase1.py              Personas ancladas + validación + RAG (Fase 1)
+examples/demo_fase2.py              Método SSR + Claude real opcional (Fase 2)
+examples/demo_fase3.py              Backtest de calibración ciego, foco Chile (Fase 3)
+examples/demo_calibracion_real.py   Autoverificación: el arnés detecta señal (offline)
 data/                    Segmentación, reseñas e ítems de ejemplo (reemplazar por datos del cliente)
 docs/                    Contexto y casos de uso, arquitectura, calibración e idea #1
 ```
 
 ## Estado
 
-Fases 0–3 completas: personas ancladas en datos demográficos reales (LATAM y
-Chile) y aterrizadas con RAG; medición de intención con el método **SSR**;
-**arnés de backtest ciego** con muestreo estratificado, doble métrica
-(correlación + forma) y controles anti-autoengaño. Claude real conectable con
+Fases 0–3 completas (calibración cerrada): personas ancladas en datos
+demográficos reales (LATAM y Chile) y aterrizadas con RAG; medición de intención
+con el método **SSR** (embedders semánticos reales enchufables); **arnés de
+backtest ciego** con muestreo estratificado, doble métrica y controles
+anti-autoengaño; **runner reproducible** que persiste reportes con metadata. La
+autoverificación offline confirma que el arnés detecta señal (r≈0.72 con un
+lector que comprende vs ~0 con el mock ciego). Claude real conectable con
 `ANTHROPIC_API_KEY`. Próximo: Fase 4 (interfaz "sube y reacciona").
 Ver `ROADMAP.md`. Panorama del producto: `docs/contexto.md`; método de
 calibración: `docs/calibracion.md`.
+
+## Correr la calibración real
+
+```bash
+pip install sentence-transformers          # embedder semántico local (sin llave)
+ANTHROPIC_API_KEY=... python -m enjambre.calibrar \
+    --embedder st --items data/tu_dataset_con_notas.json --n-agentes 100 --n-items 50
+```
 
 ## Requisitos
 
